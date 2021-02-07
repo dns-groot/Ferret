@@ -9,19 +9,15 @@ RUN apt-get update && \
 
 RUN apt-get install -y \
     apt-transport-https \
-    git \
+    software-properties-common \
     wget \
     vim
 
-RUN wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+RUN apt-add-repository ppa:git-core/ppa && \
+    apt-get update && \
+    apt-get install -y git
 
-RUN dpkg -i packages-microsoft-prod.deb
-
-RUN apt-get update 
-
-RUN apt-get install -y dotnet-sdk-5.0
-
-RUN rm packages-microsoft-prod.deb
+ENV HOME /home/ferret/
 
 RUN adduser --disabled-password --home $HOME --shell /bin/bash --gecos '' ferret && \
     echo 'ferret ALL=(ALL) NOPASSWD:ALL' >>/etc/sudoers && \
@@ -29,7 +25,17 @@ RUN adduser --disabled-password --home $HOME --shell /bin/bash --gecos '' ferret
 
 USER ferret
 
-ENV HOME /home/ferret/
+WORKDIR $HOME
+
+RUN wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb
+
+RUN sudo dpkg -i packages-microsoft-prod.deb
+
+RUN sudo apt-get update 
+
+RUN sudo apt-get install -y dotnet-sdk-5.0
+
+RUN rm packages-microsoft-prod.deb
 
 # https://stackoverflow.com/questions/600079/how-do-i-clone-a-subdirectory-only-of-a-git-repository/52269934#52269934
 
@@ -42,7 +48,8 @@ WORKDIR $HOME/Ferret/TestGenerator/
 
 # RUN cd TestGenerator/Tests && sudo dotnet add package coverlet.msbuild
 
-RUN sudo dotnet build --configuration Release 
+RUN dotnet build --configuration Release 
 
+# RUN sudo chown -R ferret:ferret /tmp/NuGetScratch/
 # Run eternal loop
 # CMD ["/bin/bash", "-c", "while :; do sleep 10; done"]

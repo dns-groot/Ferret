@@ -2,8 +2,7 @@ Ferret
 ==========
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=popout)](https://opensource.org/licenses/MIT)
-[![codecov](https://codecov.io/gh/dns-groot/DifferentialTesting/branch/main/graph/badge.svg?token=LKJO6V653R&style=popout)](https://codecov.io/gh/dns-groot/DifferentialTesting)
-
+[![codecov](https://codecov.io/gh/dns-groot/Ferret/branch/main/graph/badge.svg?token=T2A3Z90D3E&style=popout)](https://codecov.io/gh/dns-groot/DifferentialTesting)
 
 Ferret is the first automatic test generator for DNS nameserver implementation RFC compliance. 
 
