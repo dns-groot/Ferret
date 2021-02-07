@@ -1,0 +1,31 @@
+
+name: Nsd
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+    - 'DifferentialTesting/Implementations/Nsd/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+    - 'DifferentialTesting/Implementations/Nsd/**'
+
+jobs:
+  Nsd:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: |-
+          cd DifferentialTesting/Implementations
+          DOCKER_BUILDKIT=1 docker build -t nsd -f Nsd/Dockerfile .
+      
+      - name: Start DNS Service
+        run: |-
+          cd DifferentialTesting/Implementations
+          python main.py -i nsd -p 8100
+      
+      - name: Test a query
+        run: dig @127.0.0.1 -p 8100 +norecurse host1.campus.edu

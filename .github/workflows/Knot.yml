@@ -1,0 +1,31 @@
+
+name: Knot
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+    - 'DifferentialTesting/Implementations/Knot/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+    - 'DifferentialTesting/Implementations/Knot/**'
+
+jobs:
+  Knot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: |-
+          cd DifferentialTesting/Implementations
+          DOCKER_BUILDKIT=1 docker build -t knot -f Knot/Dockerfile .
+
+      - name: Start DNS Service
+        run: |-
+          cd DifferentialTesting/Implementations
+          python main.py -i knot -p 8200
+      
+      - name: Test a query
+        run: dig @127.0.0.1 -p 8200 +norecurse host1.campus.edu

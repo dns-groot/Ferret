@@ -1,0 +1,31 @@
+
+name: TrustDns
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+    - 'DifferentialTesting/Implementations/Trust-dns/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+    - 'DifferentialTesting/Implementations/Trust-dns/**'
+
+jobs:
+  TrustDns:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: |-
+          cd DifferentialTesting/Implementations
+          DOCKER_BUILDKIT=1 docker build -t trustdns -f Trust-dns/Dockerfile .
+      
+      - name: Start DNS Service
+        run: |-
+          cd DifferentialTesting/Implementations
+          python main.py -i trustdns -p 8700
+
+      - name: Test a query
+        run: dig @127.0.0.1 -p 8700 +norecurse host1.campus.edu

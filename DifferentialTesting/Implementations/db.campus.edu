@@ -1,0 +1,5 @@
+campus.edu.				      500 IN	SOA	ns1.campus.edu. root.campus.edu. 3 500 86400 2419200 500
+campus.edu.				      500 IN	NS	ns1.campus.edu.
+host1.campus.edu.			      500 IN	A	172.20.0.3
+host2.campus.edu.			      500 IN	A	172.20.0.4
+ns1.campus.edu.				      500 IN	A	172.20.0.2

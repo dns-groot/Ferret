@@ -1,0 +1,31 @@
+
+name: Yadifa
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+    - 'DifferentialTesting/Implementations/Yadifa/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+    - 'DifferentialTesting/Implementations/Yadifa/**'
+
+jobs:
+  Yadifa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: |-
+          cd DifferentialTesting/Implementations
+          DOCKER_BUILDKIT=1 docker build -t yadifa -f Yadifa/Dockerfile .
+      
+      - name: Start DNS Service
+        run: |-
+           cd DifferentialTesting/Implementations
+           python main.py -i yadifa -p 8400
+                  
+      - name: Test a query
+        run: dig @127.0.0.1 -p 8400 +norecurse host1.campus.edu

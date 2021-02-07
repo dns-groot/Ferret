@@ -1,0 +1,5 @@
+campus.edu:53 {
+    file db.campus.edu
+    log
+    errors
+}

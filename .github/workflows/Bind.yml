@@ -1,0 +1,32 @@
+
+name: Bind
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+    - 'DifferentialTesting/Implementations/Bind/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+    - 'DifferentialTesting/Implementations/Bind/**'
+
+jobs:
+  Bind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build image
+        run: |-
+          cd DifferentialTesting/Implementations
+          DOCKER_BUILDKIT=1 docker build -t bind -f Bind/Dockerfile .
+      
+      - name: Start DNS Service
+        run: |-
+          cd DifferentialTesting/Implementations/
+          python main.py -i bind -p 8000
+      
+      #dig fails only when the service is not up.
+      - name: Test a query
+        run: dig @127.0.0.1 -p 8000 +norecurse host1.campus.edu
