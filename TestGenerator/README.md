@@ -27,10 +27,10 @@ If you have trouble with native installation, then using docker is  recommend as
 ## Generation of Tests  
 
 1. If a docker container will be used for the test generation, either
-    - Copy the `Results` folder from the docker container after running the tool to the host system using `docker cp testgen:/home/ferret/TestGenerator/Results .` from the host terminal.
+    - Copy the `Results` folder from the docker container after running the tool to the host system using `docker cp testgen:/home/ferret/Ferret/TestGenerator/Results .` from the host terminal.
     - Or first create a `Results` folder in the host system and [bind mount](https://docs.docker.com/storage/bind-mounts) it while running the container:
         ```bash
-        docker run -v ~/TestGenerator/Results:/home/ferret/TestGenerator/Results -it --name=testgen ferrettestgen
+        docker run -v ~/TestGenerator/Results:/home/ferret/Ferret/TestGenerator/Results -it --name=testgen ferrettestgen
         ```
 3. Run using:
      ```bash
