@@ -121,6 +121,6 @@
             python3 Scripts/test_implementations.py -id 3 -r 8000 13000
             ```
         </details>
-    - The default host ports used for testing are: `[8000, 8100, ... 8700]*id`, which can be changed by modifying the [`get_ports`](Scripts/test_implementations.py#L33) function in the python script before running it.
+    - The default host ports used for testing are: `[8000, 8100, ... 8700]*id`, which can be changed by modifying the [`get_ports`](Scripts/test_implementations.py#L28) function in the python script before running it.
     - _Est Time:_ ~&thinsp;36 hours (&#x1F61E;) with no parallelization for the Zen generated `12,673 ` tests.
     -  _Expected Output_: Creates a folder `Differences` in the input directory to store responses for each query if they form more than one group.
