@@ -18,14 +18,14 @@ def build_docker_images(cmd, latest):
                    image_name, '-f', cmd.split(' ')[5], '.']
     print(f'Building image for {image_name}.')
     start = time.time()
-    if platform.system() == 'Windows':
-        cmd_output = subprocess.run(
-            run_cmd, stdout=subprocess.PIPE, cwd='Implementations/')
     if platform.system() == 'Linux':
         my_env = os.environ.copy()
         my_env['DOCKER_BUILDKIT'] = '1'
         cmd_output = subprocess.run(
             run_cmd, env=my_env, stdout=subprocess.PIPE, cwd='Implementations/')
+    else:
+        cmd_output = subprocess.run(
+            run_cmd, stdout=subprocess.PIPE, cwd='Implementations/')
     if cmd_output.returncode != 0:
         print(f'Error in building image for {image_name}.')
     else:
