@@ -139,7 +139,7 @@ def prepare_containers(zone_file, zone_domain, cid, restart, args):
     for impl, (check, port) in args.items():
         if check:
             processPool.append(
-                Process(target=globals()[impl], args=(zone_file, zone_domain, str(cid) + '_' + impl + '_server', port*cid, restart)))
+                Process(target=globals()[impl], args=(zone_file, zone_domain, str(cid) + '_' + impl + '_server', port*int(cid), restart)))
     for t in processPool:
         t.start()
     for t in processPool:
@@ -193,7 +193,7 @@ def run_test(zoneid, directory_path, errors, cid, ports, log):
                 respo = querier(qname, qtype, port * int(cid))
                 if not isinstance(respo, dns.message.Message):
                     single_impl = {}
-                    single_impl[impl] = (True, port)
+                    single_impl[impl] = (True, port * int(cid))
                     prepare_containers(directory_path / "FormattedZones" /
                                        (zoneid + '.txt'), zone_domain, cid, True, single_impl)
                     time.sleep(1)
@@ -235,9 +235,9 @@ def run_tests(path, start, end, args):
         stop_container(str(args.id))
 
 
-def check_positive(value):
+def check_non_negative(value):
     ivalue = int(value)
-    if ivalue <= 0:
+    if ivalue < 0:
         raise ArgumentTypeError(f"{value} is an invalid range value")
     return ivalue
 
@@ -249,7 +249,7 @@ if __name__ == '__main__':
                         help='The path to the directory containing FormattedZones and QueryResponses directories. (default: Results/)')
     parser.add_argument('-id', type=int, default=1, choices=range(1, 6),
                         help='Unique id for all the containers (useful when running comparison in parallel).')
-    parser.add_argument('-r', nargs=2, type=check_positive, metavar=('START', 'END'), default=SUPPRESS,
+    parser.add_argument('-r', nargs=2, type=check_non_negative, metavar=('START', 'END'), default=SUPPRESS,
                         help='The range of tests to compare. (default: All tests)')
     parser.add_argument('-b',  help='Disable Bind.', action="store_true")
     parser.add_argument('-n',  help='Disable Nsd.', action="store_true")
