@@ -193,7 +193,7 @@ def run_test(zoneid, directory_path, errors, cid, ports, log):
                 respo = querier(qname, qtype, port * int(cid))
                 if not isinstance(respo, dns.message.Message):
                     single_impl = {}
-                    single_impl[impl] = (True, port * int(cid))
+                    single_impl[impl] = (True, port)
                     prepare_containers(directory_path / "FormattedZones" /
                                        (zoneid + '.txt'), zone_domain, cid, True, single_impl)
                     time.sleep(1)
