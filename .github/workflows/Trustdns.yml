@@ -2,14 +2,15 @@
 name: TrustDns
 
 on:
+  workflow_dispatch:
   push:
     branches: [ main ]
     paths:
-    - 'DifferentialTesting/Implementations/Trust-dns/**'
+    - 'DifferentialTesting/Implementations/Trustdns/**'
   pull_request:
     branches: [ main ]
     paths:
-    - 'DifferentialTesting/Implementations/Trust-dns/**'
+    - 'DifferentialTesting/Implementations/Trustdns/**'
 
 jobs:
   TrustDns:
@@ -20,7 +21,7 @@ jobs:
       - name: Build image
         run: |-
           cd DifferentialTesting/Implementations
-          DOCKER_BUILDKIT=1 docker build -t trustdns:oct -f Trust-dns/Dockerfile .
+          DOCKER_BUILDKIT=1 docker build -t trustdns:oct -f Trustdns/Dockerfile .
       
       - name: Start DNS Service
         run: |-

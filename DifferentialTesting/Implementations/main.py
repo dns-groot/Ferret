@@ -17,6 +17,10 @@ from Yadifa.prepare import run as yadifa
 
 def Helper(zone_file, image, cname, port, latest):
 
+    tag = ':oct'
+    if latest:
+        tag = ':latest'
+    image += tag
     if image:
         # Check if the docker image exists.
         check_image = subprocess.run(
@@ -67,10 +71,7 @@ def Helper(zone_file, image, cname, port, latest):
         restart = True
     else:
         restart = False
-    tag = ':oct'
-    if latest:
-        tag = ':latest'
-    globals()[image_name](zone_file, zone_domain, cname, port, restart, tag)
+    globals()[image_name.split(":")[0]](zone_file, zone_domain, cname, port, restart, tag)
 
 
 if __name__ == '__main__':
