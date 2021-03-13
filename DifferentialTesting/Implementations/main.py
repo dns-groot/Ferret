@@ -15,7 +15,7 @@ from Trustdns.prepare import run as trustdns
 from Yadifa.prepare import run as yadifa
 
 
-def Helper(zone_file, image, cname, port):
+def Helper(zone_file, image, cname, port, latest):
 
     if image:
         # Check if the docker image exists.
@@ -67,7 +67,10 @@ def Helper(zone_file, image, cname, port):
         restart = True
     else:
         restart = False
-    globals()[image_name](zone_file, zone_domain, cname, port, restart)
+    tag = ':oct'
+    if latest:
+        tag = ':latest'
+    globals()[image_name](zone_file, zone_domain, cname, port, restart, tag)
 
 
 if __name__ == '__main__':
@@ -82,10 +85,12 @@ if __name__ == '__main__':
         '-p',  metavar='UNUSED_PORT', type=int, help='An unused host port to map to port 53 of the container.')
     parser.add_argument('-c', metavar='CONTAINER_NAME', type=str,
                         help='A name for the container. (default: Random Docker generated name)')
+    parser.add_argument(
+        '-l', '--latest', help='Serve using the latest image.', action="store_true")
     args = parser.parse_args()
     if (args.i and not args.p) or (not args.i and args.p):
         sys.exit(
             f'Error: Specify both the image and port arguments (not just one) to start a fresh container.')
     if not args.i and not args.p and not args.c:
         sys.exit(f'Error: Specify either an image name and a port to start a fresh container (also container name if you want to assign a name) or only the name of an existing container to reuse it.')
-    Helper(pathlib.Path(args.z.name), args.i, args.c, args.p)
+    Helper(pathlib.Path(args.z.name), args.i, args.c, args.p, args.latest)

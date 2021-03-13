@@ -25,7 +25,7 @@ RUN cd trust-dns && \
     /root/.cargo/bin/cargo build --release -p trust-dns
 
 COPY db.campus.edu trust-dns/tests/test-data/named_test_configs/
-COPY Trust-dns/config.toml trust-dns/tests/test-data/named_test_configs/
+COPY Trustdns/config.toml trust-dns/tests/test-data/named_test_configs/
 
 # Run eternal loop
 CMD ["/bin/bash", "-c", "while :; do sleep 10; done"]

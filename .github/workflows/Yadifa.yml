@@ -20,7 +20,7 @@ jobs:
       - name: Build image
         run: |-
           cd DifferentialTesting/Implementations
-          DOCKER_BUILDKIT=1 docker build -t yadifa -f Yadifa/Dockerfile .
+          DOCKER_BUILDKIT=1 docker build -t yadifa:oct -f Yadifa/Dockerfile .
       
       - name: Start DNS Service
         run: |-

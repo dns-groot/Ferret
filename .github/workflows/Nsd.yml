@@ -20,7 +20,7 @@ jobs:
       - name: Build image
         run: |-
           cd DifferentialTesting/Implementations
-          DOCKER_BUILDKIT=1 docker build -t nsd -f Nsd/Dockerfile .
+          DOCKER_BUILDKIT=1 docker build -t nsd:oct -f Nsd/Dockerfile .
       
       - name: Start DNS Service
         run: |-

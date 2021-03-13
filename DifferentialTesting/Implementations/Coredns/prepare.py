@@ -4,13 +4,13 @@ import pathlib
 import subprocess
 
 
-def run(zone_file, zone_domain, cname, port, restart):
+def run(zone_file, zone_domain, cname, port, restart, tag):
 
     if restart:
         subprocess.run(['docker', 'container', 'rm', cname, '-f'],
                        stdout=subprocess.PIPE)
         subprocess.run(['docker', 'run', '-dp', str(port)+':53/udp',
-                        '--name=' + cname, 'coredns'], stdout=subprocess.PIPE)
+                        '--name=' + cname, 'coredns' + tag], stdout=subprocess.PIPE)
     else:
         subprocess.run(
             ['docker', 'exec', cname, 'pkill', 'coredns'], stdout=subprocess.PIPE)

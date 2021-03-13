@@ -20,7 +20,7 @@ jobs:
       - name: Build image
         run: |-
           cd DifferentialTesting/Implementations
-          DOCKER_BUILDKIT=1 docker build -t coredns -f Coredns/Dockerfile .
+          DOCKER_BUILDKIT=1 docker build -t coredns:oct -f Coredns/Dockerfile .
       
       - name: Start DNS Service
         run: |-

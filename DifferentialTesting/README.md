@@ -93,7 +93,7 @@ Use either Zen generated tests or custom tests to test implementations.<br>
 ### 3. Response Grouping
 Compare mulitple implementations' responses using `python3 -m Scripts.test_implementations`
 ```
-usage: Scripts.test_implementations [-h] [-path DIRECTORY_PATH] [-id {1,2,3,4,5}] [-r START END] [-b] [-n] [-k] [-p] [-c] [-y] [-m] [-t]
+usage: Scripts.test_implementations [-h] [-path DIRECTORY_PATH] [-id {1,2,3,4,5}] [-r START END] [-b] [-n] [-k] [-p] [-c] [-y] [-m] [-t] [-l]
 
 Compares implementations' responses for the input tests.
 
@@ -110,6 +110,7 @@ optional arguments:
 -y                    Disable Yadifa. (default: False)
 -m                    Disable MaraDns. (default: False)
 -t                    Disable TrustDns. (default: False)
+-l, --latest          Test using latest images. (default:False)
 ```
 - Arguments `-r` and `-id` can be used to parallelize testing. 
     <details>

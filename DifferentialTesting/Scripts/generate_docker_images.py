@@ -11,9 +11,11 @@ from multiprocessing import Manager, Process
 def build_docker_images(cmd, latest):
     image_name = cmd.split(' ')[3]
     if latest:
+        image_name += ':latest'
         run_cmd = ['docker', 'build', '-t', image_name, '-f',
-                   cmd.split(' ')[5], '--build-arg', 'latest=true', '.']
+                   cmd.split(' ')[5], '--no-cache', '--build-arg', 'latest=true', '.']
     else:
+        image_name += ':oct'
         run_cmd = ['docker', 'build', '-t',
                    image_name, '-f', cmd.split(' ')[5], '.']
     print(f'Building image for {image_name}.')

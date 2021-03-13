@@ -46,12 +46,12 @@ def stop_container(cid):
                        stdout=subprocess.PIPE)
 
 
-def start_containers(cid, implementations):
+def start_containers(cid, implementations, tag):
     stop_container(cid)
     for impl, (check, port) in implementations.items():
         if check:
             subprocess.run(['docker', 'run', '-dp', str(port * int(cid))+':53/udp',
-                            '--name=' + str(cid) + '_' + impl + '_server', impl])
+                            '--name=' + str(cid) + '_' + impl + '_server', impl + tag])
 
 
 def querier(query_name, query_type, port):
@@ -134,19 +134,19 @@ def groups_to_string(groups):
     return tmp
 
 
-def prepare_containers(zone_file, zone_domain, cid, restart, args):
+def prepare_containers(zone_file, zone_domain, cid, restart, implementations, tag):
     processPool = []
-    for impl, (check, port) in args.items():
+    for impl, (check, port) in implementations.items():
         if check:
             processPool.append(
-                Process(target=globals()[impl], args=(zone_file, zone_domain, str(cid) + '_' + impl + '_server', port*int(cid), restart)))
+                Process(target=globals()[impl], args=(zone_file, zone_domain, str(cid) + '_' + impl + '_server', port*int(cid), restart, tag)))
     for t in processPool:
         t.start()
     for t in processPool:
         t.join()
 
 
-def run_test(zoneid, directory_path, errors, cid, ports, log):
+def run_test(zoneid, directory_path, errors, cid, ports, log, tag):
     has_dname = False
     zone_domain = ''
     with open(directory_path / "FormattedZones" / (zoneid + '.txt'), 'r') as z:
@@ -174,7 +174,7 @@ def run_test(zoneid, directory_path, errors, cid, ports, log):
         return
 
     prepare_containers(directory_path / "FormattedZones" /
-                       (zoneid + '.txt'), zone_domain, cid, False, implementations)
+                       (zoneid + '.txt'), zone_domain, cid, False, implementations, tag)
 
     queries = []
     with open(directory_path / "QueryResponses" / (zoneid + '.json'), 'r') as f:
@@ -195,7 +195,7 @@ def run_test(zoneid, directory_path, errors, cid, ports, log):
                     single_impl = {}
                     single_impl[impl] = (True, port)
                     prepare_containers(directory_path / "FormattedZones" /
-                                       (zoneid + '.txt'), zone_domain, cid, True, single_impl)
+                                       (zoneid + '.txt'), zone_domain, cid, True, single_impl, tag)
                     time.sleep(1)
                     respo = querier(qname, qtype, port * int(cid))
                 responses.append((impl, respo))
@@ -217,11 +217,14 @@ def run_tests(path, start, end, args):
     timer = time.time()
     sub_timer = time.time()
     implementations = get_ports(args)
-    start_containers(args.id, implementations)
+    tag = ':oct'
+    if args.latest:
+        tag = ':latest'
+    start_containers(args.id, implementations, tag)
     with open(path / (str(args.id) + '_log.txt'), 'w') as f:
         for zone in sorted((path / "FormattedZones").iterdir())[start:end]:
             f.write(f'Checking zone: {zone.stem}\n')
-            run_test(zone.stem, path, errors, str(args.id), implementations, f)
+            run_test(zone.stem, path, errors, str(args.id), implementations, f, tag)
             i += 1
             if i % 25 == 0:
                 f.write(
@@ -259,6 +262,8 @@ if __name__ == '__main__':
     parser.add_argument('-y',  help='Disable Yadifa.', action="store_true")
     parser.add_argument('-m',  help='Disable MaraDns.', action="store_true")
     parser.add_argument('-t',  help='Disable TrustDns.', action="store_true")
+    parser.add_argument(
+        '-l', '--latest', help='Test using latest images.', action="store_true")
 
     args = parser.parse_args()
     checked_implementations = (not args.b) + (not args.n) + (not args.k) + \

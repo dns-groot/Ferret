@@ -20,7 +20,7 @@ jobs:
       - name: Build image
         run: |-
           cd DifferentialTesting/Implementations
-          DOCKER_BUILDKIT=1 docker build -t trustdns -f Trust-dns/Dockerfile .
+          DOCKER_BUILDKIT=1 docker build -t trustdns:oct -f Trust-dns/Dockerfile .
       
       - name: Start DNS Service
         run: |-

@@ -70,13 +70,13 @@ yadifad = '''
 '''
 
 
-def run(zone_file, zone_domain, cname, port, restart):
+def run(zone_file, zone_domain, cname, port, restart, tag):
 
     if restart:
         subprocess.run(['docker', 'container', 'rm', cname, '-f'],
                        stdout=subprocess.PIPE)
         subprocess.run(['docker', 'run', '-dp', str(port)+':53/udp',
-                        '--name=' + cname, 'yadifa'], stdout=subprocess.PIPE)
+                        '--name=' + cname, 'yadifa' + tag], stdout=subprocess.PIPE)
     else:
         output = subprocess.run(['docker', 'exec', cname, 'yadifa',
                                  'ctrl', '-y', 'controller-key:ControlDaemonKey', 'shutdown'], stdout=subprocess.PIPE)

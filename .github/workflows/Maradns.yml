@@ -20,7 +20,7 @@ jobs:
       - name: Build image
         run: |-
           cd DifferentialTesting/Implementations
-          DOCKER_BUILDKIT=1 docker build -t maradns -f Maradns/Dockerfile .
+          DOCKER_BUILDKIT=1 docker build -t maradns:oct -f Maradns/Dockerfile .
       
       - name: Start DNS Service
         run: |-

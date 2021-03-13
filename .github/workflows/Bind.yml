@@ -20,7 +20,7 @@ jobs:
       - name: Build image
         run: |-
           cd DifferentialTesting/Implementations
-          DOCKER_BUILDKIT=1 docker build -t bind -f Bind/Dockerfile .
+          DOCKER_BUILDKIT=1 docker build -t bind:oct -f Bind/Dockerfile .
       
       - name: Start DNS Service
         run: |-

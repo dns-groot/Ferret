@@ -20,7 +20,7 @@ jobs:
       - name: Build image
         run: |-
           cd DifferentialTesting/Implementations
-          DOCKER_BUILDKIT=1 docker build -t powerdns -f Powerdns/Dockerfile .
+          DOCKER_BUILDKIT=1 docker build -t powerdns:oct -f Powerdns/Dockerfile .
       
       - name: Start DNS Service
         run: |-

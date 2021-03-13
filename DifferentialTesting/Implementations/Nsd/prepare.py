@@ -6,13 +6,13 @@ import subprocess
 # Zone file has to have a new line at the end for NSD to accept it without any issues.
 
 
-def run(zone_file, zone_domain, cname, port, restart):
+def run(zone_file, zone_domain, cname, port, restart, tag):
 
     if restart:
         subprocess.run(['docker', 'container', 'rm', cname, '-f'],
                        stdout=subprocess.PIPE)
         subprocess.run(['docker', 'run', '-dp', str(port)+':53/udp',
-                        '--name=' + cname, 'nsd'], stdout=subprocess.PIPE)
+                        '--name=' + cname, 'nsd'+ tag], stdout=subprocess.PIPE)
     else:
         subprocess.run(
             ['docker', 'exec', cname, 'nsd-control', 'stop'], stdout=subprocess.PIPE)

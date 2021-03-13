@@ -2,7 +2,7 @@
 
 1. Build the image of the required implementation using:
     ```bash
-    docker build -t <image_name> -f <folder_name>/Dockerfile .
+    docker build -t <image_name>:oct -f <folder_name>/Dockerfile .
     ```
     where, the `image_name` would be `bind` and `folder_name` would be `Bind` to build a Bind image.<br>
     **Please note:**
@@ -22,7 +22,7 @@
 
     To build the image using the latest main branch, pass `true` to the build argument `latest`<sup>[:warning:](#note_1)</sup>:
     ```bash
-    docker build -t <image_name> -f <folder_name>/Dockerfile --build-arg latest=true .
+    docker build -t <image_name>:latest -f <folder_name>/Dockerfile --build-arg latest=true .
     ```
 
 2. Serve a zone file with an implementation using `python3 main.py`.
@@ -41,6 +41,7 @@
         coredns, yadifa, maradns, trustdns} The docker image name of the implementation to start a container.
     -p UNUSED_PORT                          An unused host port to map to port 53 of the container.
     -c CONTAINER_NAME                       A name for the container. (default: Random Docker generated name)
+    -l, --latest                            Serve using the latest image.
     </pre>
 
 3. Query from the host machine using:

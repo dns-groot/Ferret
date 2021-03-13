@@ -7,13 +7,13 @@ import subprocess
 # Start MaraDNS from the terminal inside the container using `maradns` to see the logs on stdout.
 
 
-def run(zone_file, zone_domain, cname, port, restart):
+def run(zone_file, zone_domain, cname, port, restart, tag):
 
     if restart:
         subprocess.run(['docker', 'container', 'rm', cname, '-f'],
                        stdout=subprocess.PIPE)
         subprocess.run(['docker', 'run', '-dp', str(port)+':53/udp',
-                        '--name=' + cname, 'maradns'], stdout=subprocess.PIPE)
+                        '--name=' + cname, 'maradns'+ tag], stdout=subprocess.PIPE)
     else:
         subprocess.run(['docker', 'exec', cname,
                         '/etc/init.d/maradns', 'stop'], stdout=subprocess.PIPE)

@@ -20,7 +20,7 @@ jobs:
       - name: Build image
         run: |-
           cd DifferentialTesting/Implementations
-          DOCKER_BUILDKIT=1 docker build -t knot -f Knot/Dockerfile .
+          DOCKER_BUILDKIT=1 docker build -t knot:oct -f Knot/Dockerfile .
 
       - name: Start DNS Service
         run: |-
