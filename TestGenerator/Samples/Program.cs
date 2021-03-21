@@ -23,26 +23,25 @@
             return JsonSerializer.Serialize(d, options);
         }
 
-        private static Zen<bool> ValidityConstraints(Zen<Query> q, Zen<Zone> z)
+        private static Zen<bool> RRLookupConstraints(Zen<Zone> z, Zen<Query> q, Zen<IList<ResourceRecord>> rrs)
         {
             return And(
                 z.IsValidZone(),
                 q.IsValidQuery(),
-                Utils.IsPrefix(z.GetRecords().Where(r => r.GetRType() == RecordType.SOA).At(0).Value().GetRName(), q.GetQName()));
+                Utils.IsPrefix(z.GetRecords().Where(r => r.GetRType() == RecordType.SOA).At(0).Value().GetRName(), q.GetQName()),
+                rrs == ServerModel.GetRelevantRRs(q, z));
         }
-
-        static void GenerateTestsExhaustiveQueryLookup(string outputDir, int maxLength)
+        static void GenerateTestsExhaustiveRRLookup(string outputDir, int maxLength)
         {
             var watch = System.Diagnostics.Stopwatch.StartNew();
-            var function = Function<Query, Zone, Option<Response>>(ServerModel.QueryLookup);
-            var relevantRRs = Function<Query, Zone, IList<ResourceRecord>>(ServerModel.GetRelevantRRs);
-            relevantRRs.Compile();
+            var function = Function<IList<ResourceRecord>, Query, Zone, Response>(ServerModel.RRLookup);
             int i = 0;
             var intermediateTimer = System.Diagnostics.Stopwatch.StartNew();
-            foreach (var events in function.GenerateInputs(precondition: (q, z) => ValidityConstraints(q, z), listSize: maxLength, checkSmallerLists: true))
+            Console.WriteLine($"Starting the constraint solving for maximum length {maxLength}");
+            foreach (var events in function.GenerateInputs(precondition: (rrs, q, z) => RRLookupConstraints(z, q, rrs), listSize: maxLength, checkSmallerLists: true))
             {
-                var response = function.Evaluate(events.Item1, events.Item2).Value;
-                var info = CreateJson(events.Item1, events.Item2, relevantRRs.Evaluate(events.Item1, events.Item2), response);
+                var response = function.Evaluate(events.Item1, events.Item2, events.Item3);
+                var info = CreateJson(events.Item2, events.Item3, events.Item1, response);
                 FileInfo file = new FileInfo(outputDir + i + ".json");
                 file.Directory.Create();
                 File.WriteAllText(file.FullName, info);
@@ -50,14 +49,13 @@
                 if (i % 100 == 0)
                 {
                     intermediateTimer.Stop();
-                    Console.WriteLine($"Time for generation of test from {i - 100} - {i}: {intermediateTimer.ElapsedMilliseconds} ms");
+                    Console.WriteLine($"Time for generation of tests from {i - 100} - {i}: {intermediateTimer.ElapsedMilliseconds} ms");
                     intermediateTimer = System.Diagnostics.Stopwatch.StartNew();
                 }
             }
             watch.Stop();
             Console.WriteLine($"Total time to generate {i} tests: {watch.ElapsedMilliseconds} ms");
         }
-
         static void GenerateTestsZones()
         {
             var watch = System.Diagnostics.Stopwatch.StartNew();
@@ -87,7 +85,7 @@
             Console.WriteLine($"Total time to generate {i} zone files: {watch.ElapsedMilliseconds} ms");
         }
 
-        static Zen<bool> ZoneValidityHelper(IList<Zen<bool>> conditions, ISet<int> falseIndicies)
+        static Zen<bool> InvalidZonesGenerationHelper(IList<Zen<bool>> conditions, ISet<int> falseIndicies)
         {
             IList<Zen<bool>> predicates = new List<Zen<bool>>();
             for (var i = 0; i < conditions.Count; i++)
@@ -106,12 +104,12 @@
 
         static void GenerateInvalidZones(string outputDir, int maxLength)
         {
-            for (var j = 0; j < 14; j++)
+            for (var j = 0; j < ZoneExtensions.ValidZoneConditions(Zone.Create(new List<ResourceRecord>())).Count(); j++)
             {
                 var watch = System.Diagnostics.Stopwatch.StartNew();
                 var function = Function<Zone, bool>(ZoneExtensions.IsValidZone);
                 var falseIndicies = new HashSet<int> { j };
-                var zones = function.FindAll((z, t) => ZoneValidityHelper(z.ValidZoneConditions(), falseIndicies), listSize: maxLength, checkSmallerLists: true).Take(100);
+                var zones = function.FindAll((z, t) => InvalidZonesGenerationHelper(z.ValidZoneConditions(), falseIndicies), listSize: maxLength, checkSmallerLists: true).Take(100);
                 function.Compile();
                 int i = 0;
                 var s = string.Join("_", falseIndicies);
@@ -165,7 +163,7 @@
                        if (o.Function == FunctionsEnum.QueryLookup)
                        {
                            Directory.CreateDirectory(Path.GetFullPath(o.OutputDir) + "/LookupTests/");
-                           GenerateTestsExhaustiveQueryLookup(Path.GetFullPath(o.OutputDir) + "/LookupTests/", o.MaximumLength);
+                           GenerateTestsExhaustiveRRLookup(Path.GetFullPath(o.OutputDir) + "/LookupTests/", o.MaximumLength);
                        }
                        else
                        {

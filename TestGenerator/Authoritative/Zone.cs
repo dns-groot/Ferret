@@ -268,7 +268,7 @@
         /// <returns>A boolean.</returns>
         public static Zen<bool> IsValidZone(this Zen<Zone> z)
         {
-            return z.ValidZoneConditions().Aggregate(AndIf);
+            return z.ValidZoneConditions().Aggregate((a, b) => And(a, b));
         }
     }
 }
