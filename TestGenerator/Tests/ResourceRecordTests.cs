@@ -4,6 +4,7 @@ namespace Tests
     using System.Diagnostics.CodeAnalysis;
     using Authoritative;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using ZenLib;
     using static ZenLib.Language;
 
     /// <summary>
@@ -19,7 +20,7 @@ namespace Tests
         [TestMethod]
         public void TestDomainNameEquality()
         {
-            var function = Function<DomainName, DomainName, bool>((d1, d2) => d1 == d2);
+            var function = new ZenFunction<DomainName, DomainName, bool>((d1, d2) => d1 == d2);
 
             var d1 = new DomainName { Value = new List<byte> { 1, 2 } };
             var d2 = new DomainName { Value = new List<byte> { 1, 2 } };
@@ -36,7 +37,7 @@ namespace Tests
         [TestMethod]
         public void TestWildcardRecord()
         {
-            var function = Function<ResourceRecord, bool>(ResourceRecordExtensions.IsWildcardRecord);
+            var function = new ZenFunction<ResourceRecord, bool>(ResourceRecordExtensions.IsWildcardRecord);
 
             var record = new ResourceRecord
             {
@@ -59,7 +60,7 @@ namespace Tests
         [TestMethod]
         public void TestDomainNamePrefix()
         {
-            var function = Function<DomainName, DomainName, bool>(Utils.IsPrefix);
+            var function = new ZenFunction<DomainName, DomainName, bool>(Utils.IsPrefix);
             Assert.AreEqual(function.Evaluate(new DomainName { Value = new List<byte> { } }, new DomainName { Value = new List<byte> { } }), true);
 
             Assert.AreEqual(function.Evaluate(new DomainName { Value = new List<byte> { } }, new DomainName { Value = new List<byte> { 0 } }), true);
@@ -81,7 +82,7 @@ namespace Tests
         [TestMethod]
         public void TestRRValidityEvaluate()
         {
-            var function = Function<ResourceRecord, bool>(ResourceRecordExtensions.IsValidRecord);
+            var function = new ZenFunction<ResourceRecord, bool>(ResourceRecordExtensions.IsValidRecord);
 
             var soa = new ResourceRecord
             {
@@ -146,7 +147,7 @@ namespace Tests
         [TestMethod]
         public void TestRRValidityVerify()
         {
-            var function = Function<ResourceRecord, bool>(ResourceRecordExtensions.IsValidRecord);
+            var function = new ZenFunction<ResourceRecord, bool>(ResourceRecordExtensions.IsValidRecord);
 
             // Name should be non-empty
             var result = function.Find((r, v) => And(v, r.GetRName().GetValue().IsEmpty()));

@@ -4,6 +4,7 @@
     using System.Diagnostics.CodeAnalysis;
     using Authoritative;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using ZenLib;
     using static ZenLib.Language;
 
     /// <summary>
@@ -19,7 +20,7 @@
         [TestMethod]
         public void TestZoneValidityEvaluate()
         {
-            var function = Function<Zone, bool>(ZoneExtensions.IsValidZone);
+            var function = new ZenFunction<Zone, bool>(ZoneExtensions.IsValidZone);
 
             var soa = new ResourceRecord
             {
@@ -67,7 +68,7 @@
         [TestMethod]
         public void TestZoneValidityVerify()
         {
-            var function = Function<Zone, bool>(ZoneExtensions.IsValidZone);
+            var function = new ZenFunction<Zone, bool>(ZoneExtensions.IsValidZone);
 
             // Zone should have exactly one SOA record.
             var multipleSoa = function.Find((z, t) => And(z.GetRecords().Where(r => r.GetRType() == RecordType.SOA).Length() != 1, t), listSize: 3);
