@@ -34,7 +34,7 @@
         static void GenerateTestsExhaustiveRRLookup(string outputDir, int maxLength)
         {
             var watch = System.Diagnostics.Stopwatch.StartNew();
-            var function = Function<IList<ResourceRecord>, Query, Zone, Response>(ServerModel.RRLookup);
+            var function = new ZenFunction<IList<ResourceRecord>, Query, Zone, Response>(ServerModel.RRLookup);
             int i = 0;
             var intermediateTimer = System.Diagnostics.Stopwatch.StartNew();
             Console.WriteLine($"Starting the constraint solving for maximum length {maxLength}");
@@ -59,7 +59,7 @@
         static void GenerateTestsZones()
         {
             var watch = System.Diagnostics.Stopwatch.StartNew();
-            var function = Function<Zone, bool>(ZoneExtensions.IsValidZone);
+            var function = new ZenFunction<Zone, bool>(ZoneExtensions.IsValidZone);
             int i = 0;
             var watchForSome = System.Diagnostics.Stopwatch.StartNew();
             foreach (var events in function.GenerateInputs(precondition: z => z.GetRecords().All(ResourceRecordExtensions.IsValidRecord), listSize: 4, checkSmallerLists: true))
@@ -107,7 +107,7 @@
             for (var j = 0; j < ZoneExtensions.ValidZoneConditions(Zone.Create(new List<ResourceRecord>())).Count(); j++)
             {
                 var watch = System.Diagnostics.Stopwatch.StartNew();
-                var function = Function<Zone, bool>(ZoneExtensions.IsValidZone);
+                var function = new ZenFunction<Zone, bool>(ZoneExtensions.IsValidZone);
                 var falseIndicies = new HashSet<int> { j };
                 var zones = function.FindAll((z, t) => InvalidZonesGenerationHelper(z.ValidZoneConditions(), falseIndicies), listSize: maxLength, checkSmallerLists: true).Take(100);
                 function.Compile();
@@ -151,6 +151,7 @@
         }
         static void Main(string[] args)
         {
+            Settings.PreserveBranches = true;
             var parser = new Parser(with =>
             {
                 // ignore case for enum values
