@@ -21,7 +21,7 @@
         [TestMethod]
         public void TestMaxofList()
         {
-            var function = new ZenFunction<IList<ushort>, ushort>(ServerModel.MaxofList);
+            var function = Function<IList<ushort>, ushort>(ServerModel.MaxofList);
             Assert.AreEqual(function.Evaluate(new List<ushort> { 3, 2, 1 }), (ushort)3);
             Assert.AreEqual(function.Evaluate(new List<ushort> { }), (ushort)0);
             Assert.AreEqual(function.Evaluate(new List<ushort> { 1 }), (ushort)1);
@@ -38,7 +38,7 @@
         [TestMethod]
         public void TestMaximalPrefixMatch()
         {
-            var function = new ZenFunction<DomainName, DomainName, ushort>(Utils.MaximalPrefixMatch);
+            var function = Function<DomainName, DomainName, ushort>(Utils.MaximalPrefixMatch);
             Assert.AreEqual(function.Evaluate(new DomainName { Value = new List<byte> { } }, new DomainName { Value = new List<byte> { } }), (ushort)0);
             Assert.AreEqual(function.Evaluate(new DomainName { Value = new List<byte> { } }, new DomainName { Value = new List<byte> { 0 } }), (ushort)0);
             Assert.AreEqual(function.Evaluate(new DomainName { Value = new List<byte> { 2, 0 } }, new DomainName { Value = new List<byte> { } }), (ushort)0);
@@ -59,7 +59,7 @@
         [TestMethod]
         public void TestDomainWildcardMatch()
         {
-            var function = new ZenFunction<DomainName, DomainName, bool>(Utils.IsDomainWildcardMatch);
+            var function = Function<DomainName, DomainName, bool>(Utils.IsDomainWildcardMatch);
             Assert.IsFalse(function.Evaluate(new DomainName { Value = new List<byte> { } }, new DomainName { Value = new List<byte> { } }));
             Assert.IsFalse(function.Evaluate(new DomainName { Value = new List<byte> { } }, new DomainName { Value = new List<byte> { 1 } }));
             Assert.IsTrue(function.Evaluate(new DomainName { Value = new List<byte> { 2, 0 } }, new DomainName { Value = new List<byte> { 2, 1 } }));
@@ -74,7 +74,7 @@
         [TestMethod]
         public void TestGetRelevantRRs()
         {
-            var function = new ZenFunction<Query, Zone, IList<ResourceRecord>>(ServerModel.GetRelevantRRs);
+            var function = Function<Query, Zone, IList<ResourceRecord>>(ServerModel.GetRelevantRRs);
             var soa = new ResourceRecord
             {
                 RName = new DomainName { Value = new List<byte> { 32 } },
@@ -162,7 +162,7 @@
         [TestMethod]
         public void TestGetRelevantRRsWildcardTest()
         {
-            var function = new ZenFunction<Query, Zone, IList<ResourceRecord>>(ServerModel.GetRelevantRRs);
+            var function = Function<Query, Zone, IList<ResourceRecord>>(ServerModel.GetRelevantRRs);
             var soa = new ResourceRecord
             {
                 RName = new DomainName { Value = new List<byte> { 32 } },
@@ -250,7 +250,7 @@
         [TestMethod]
         public void TestExactMatch()
         {
-            var function = new ZenFunction<IList<ResourceRecord>, Query, Zone, Response>(ServerModel.ExactMatch);
+            var function = Function<IList<ResourceRecord>, Query, Zone, Response>(ServerModel.ExactMatch);
 
             // ExactMatch should not return NX response on valid inputs
             var nxResponse = function.Find((rrs, q, z, res) => And(
@@ -308,7 +308,7 @@
         [TestMethod]
         public void TestWildcardMatch()
         {
-            var function = new ZenFunction<IList<ResourceRecord>, Query, Zone, Response>(ServerModel.WildcardMatch);
+            var function = Function<IList<ResourceRecord>, Query, Zone, Response>(ServerModel.WildcardMatch);
 
             // WildcardMatch should not return NX response on valid inputs
             var nxResponse = function.Find((rrs, q, z, res) => And(
@@ -336,7 +336,7 @@
         [TestMethod]
         public void TestQueryLookupExample()
         {
-            var function = new ZenFunction<Query, Zone, Option<Response>>(ServerModel.QueryLookup);
+            var function = Function<Query, Zone, Option<Response>>(ServerModel.QueryLookup);
             var soa = new ResourceRecord
             {
                 RName = new DomainName { Value = new List<byte> { 8 } },
