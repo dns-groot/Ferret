@@ -37,7 +37,7 @@
             var function = Function<IList<ResourceRecord>, Query, Zone, Response>(ServerModel.RRLookup);
             int i = 0;
             var intermediateTimer = System.Diagnostics.Stopwatch.StartNew();
-            Console.WriteLine($"Starting the constraint solving for maximum length {maxLength}");
+            Console.WriteLine($"{DateTime.Now} Starting the constraint solving for maximum length {maxLength} for exhaustive test generation of RRLookup");
             foreach (var events in function.GenerateInputs(precondition: (rrs, q, z) => RRLookupConstraints(z, q, rrs), listSize: maxLength, checkSmallerLists: true))
             {
                 var response = function.Evaluate(events.Item1, events.Item2, events.Item3);
@@ -49,40 +49,12 @@
                 if (i % 100 == 0)
                 {
                     intermediateTimer.Stop();
-                    Console.WriteLine($"Time for generation of tests from {i - 100} - {i}: {intermediateTimer.ElapsedMilliseconds} ms");
+                    Console.WriteLine($"{DateTime.Now} Time for generation of tests from {i - 100} - {i}: {intermediateTimer.ElapsedMilliseconds} ms");
                     intermediateTimer = System.Diagnostics.Stopwatch.StartNew();
                 }
             }
             watch.Stop();
-            Console.WriteLine($"Total time to generate {i} tests: {watch.ElapsedMilliseconds} ms");
-        }
-        static void GenerateTestsZones()
-        {
-            var watch = System.Diagnostics.Stopwatch.StartNew();
-            var function = Function<Zone, bool>(ZoneExtensions.IsValidZone);
-            int i = 0;
-            var watchForSome = System.Diagnostics.Stopwatch.StartNew();
-            foreach (var events in function.GenerateInputs(precondition: z => z.GetRecords().All(ResourceRecordExtensions.IsValidRecord), listSize: 4, checkSmallerLists: true))
-            {
-                var validity = function.Evaluate(events);
-                var d = new Dictionary<string, object>() { };
-                d.Add("Zone", events);
-                d.Add("Valid", validity);
-                var options = new JsonSerializerOptions { WriteIndented = true };
-                var info = JsonSerializer.Serialize(d, options);
-                FileInfo file = new FileInfo("Valid_Invalid/" + i + ".json");
-                file.Directory.Create();
-                File.WriteAllText(file.FullName, info);
-                i++;
-                if (i % 100 == 0)
-                {
-                    watchForSome.Stop();
-                    Console.WriteLine($"Time for generation of {i - 100} - {i}: {watchForSome.ElapsedMilliseconds} ms");
-                    watchForSome = System.Diagnostics.Stopwatch.StartNew();
-                }
-            }
-            watch.Stop();
-            Console.WriteLine($"Total time to generate {i} zone files: {watch.ElapsedMilliseconds} ms");
+            Console.WriteLine($"{DateTime.Now} Total time to generate {i} tests for RRLookup: {watch.ElapsedMilliseconds} ms");
         }
 
         static Zen<bool> InvalidZonesGenerationHelper(IList<Zen<bool>> conditions, ISet<int> falseIndicies)
@@ -126,7 +98,7 @@
                     i++;
                 }
                 watch.Stop();
-                Console.WriteLine($"Total execution time to generate {i} zone files for false indicies {s}: {watch.ElapsedMilliseconds} ms");
+                Console.WriteLine($"{DateTime.Now} Total execution time to generate {i} invalid zone files for false indicies {s}: {watch.ElapsedMilliseconds} ms");
             }
         }
 
@@ -134,8 +106,8 @@
         public enum FunctionsEnum
         {
             None = 0x0,
-            QueryLookup = 0x1,
-            InvalidZones = 0x2,
+            RRLookup = 0x1,
+            InvalidZoneFiles = 0x2,
         }
 
         public class Options
@@ -143,7 +115,7 @@
             [Option('o', "outputDir", Default = "Results/", HelpText = "The path to the folder to output the generated tests.")]
             public string OutputDir { get; set; }
 
-            [Option('f', "function", Default = FunctionsEnum.QueryLookup, HelpText = "Generate tests for either 'QueryLookup' (1) or 'InvalidZones' (2).")]
+            [Option('f', "function", Default = FunctionsEnum.RRLookup, HelpText = "Generate tests for either 'RRLookup' (1) or generate invalid zone files 'InvalidZoneFiles' (2).")]
             public FunctionsEnum Function { get; set; }
 
             [Option('l', "length", Default = 4, HelpText = "The maximum number of records in a zone and the maximum length of a domain.")]
@@ -160,14 +132,15 @@
             parser.ParseArguments<Options>(args)
                    .WithParsed(o =>
                    {
-                       if (o.Function == FunctionsEnum.QueryLookup)
+                       if (o.Function == FunctionsEnum.RRLookup)
                        {
-                           Directory.CreateDirectory(Path.GetFullPath(o.OutputDir) + "/LookupTests/");
-                           GenerateTestsExhaustiveRRLookup(Path.GetFullPath(o.OutputDir) + "/LookupTests/", o.MaximumLength);
+                           var outputPath = Path.GetFullPath(o.OutputDir) + "/ValidZoneFileTests/ZenTests/";
+                           Directory.CreateDirectory(outputPath);
+                           GenerateTestsExhaustiveRRLookup(outputPath, o.MaximumLength);
                        }
                        else
                        {
-                           GenerateInvalidZones(Path.GetFullPath(o.OutputDir) + "/InvalidZones/", o.MaximumLength);
+                           GenerateInvalidZones(Path.GetFullPath(o.OutputDir) + "/InvalidZoneFileTests/", o.MaximumLength);
                        }
                    });
         }

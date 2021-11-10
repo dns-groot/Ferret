@@ -66,7 +66,7 @@
         /// <param name="z">The zone.</param>
         /// <param name="q">The query.</param>
         /// <returns>The response for the query.</returns>
-        public static Zen<Option<Response>> QueryLookup(Zen<Query> q, Zen<Zone> z)
+        public static Zen<Option<Response>> ServerLookup(Zen<Query> q, Zen<Zone> z)
         {
             return If(
                 And(z.IsValidZone(), q.IsValidQuery()),

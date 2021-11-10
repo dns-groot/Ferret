@@ -13,7 +13,7 @@
     /// </summary>
     [TestClass]
     [ExcludeFromCodeCoverage]
-    public class QueryLookupTests
+    public class ServerLookupTests
     {
         /// <summary>
         /// Test maximum of a list.
@@ -331,12 +331,12 @@
         }
 
         /// <summary>
-        /// Check QueryLookup output for an example.
+        /// Check ServerLookup output for an example.
         /// </summary>
         [TestMethod]
-        public void TestQueryLookupExample()
+        public void TestServerLookupExample()
         {
-            var function = Function<Query, Zone, Option<Response>>(ServerModel.QueryLookup);
+            var function = Function<Query, Zone, Option<Response>>(ServerModel.ServerLookup);
             var soa = new ResourceRecord
             {
                 RName = new DomainName { Value = new List<byte> { 8 } },
