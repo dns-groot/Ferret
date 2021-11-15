@@ -1,16 +1,78 @@
+
+---
+
+[**DNS Nameserver Tests -**](#dns-nameserver-tests)
+&nbsp;
+[Valid Zone File Tests](#valid-zone-file-tests)
+&nbsp; &middot; &nbsp;
+[Valid Zone File Tests](#invalid-zone-file-tests)
+&nbsp; &nbsp; &vert; &nbsp; &nbsp;
+[Pre-generated Tests](#pre-generated-tests)
+&nbsp; &nbsp; &vert; &nbsp; &nbsp;
+[Installation](#installation)
+&nbsp; &nbsp; &vert; &nbsp; &nbsp;
+[Generation of Tests](#generation-of-tests)
+
+---
+
+## DNS Nameserver Tests
+A test case in DNS consists of a query and zone file. 
+
+### Valid Zone File Tests
+Ferret generates valid tests, where each valid test consists of a valid zone file and a valid query by executing the Zen model of the authoritative semantics of DNS present in this folder, which is based on the [DNS formal semantics](https://sivakesava1.github.io/assets/pdf/sigcomm20_groot.pdf) that we developed from mulitple DNS RFCs.
+Our formal semantics focuses on query lookup at a single nameserver, which we model as a stateless function that takes a user query and a zone file and produces a DNS response.The figure belows shows an abstract view of this function as a decision tree.
+Each leaf node represents a unique case in the DNS, where a response is created and returned to the user.
+<p align="center">
+  <img src="AuthoritativeTree.PNG"/>
+  <span class="img_caption" style="display: block; text-align: center;"> <sub>[&thinsp;Abstract representation of the Authoritative DNS decision tree used to respond to a user query.&thinsp;]</sub></span>
+  <br>
+</p>
+
+Symbolic execution of the above function (tree) generates inputs that drive the function down different execution paths, thereby enabling Ferret to systematically explore the space of DNS behaviors and feature interactions.
+
+### Invalid Zone File Tests
+While it’s critical to be able to generate well-formed zone files for testing, bugs can also lurk in implementations' handling of ill-formed zones. 
+Our executable Zen model includes a formulation of the validity conditions for zone files.
+
+<details>
+<summary><kbd>CLICK</kbd> to reveal zone validity conditions </summary>
+
+----
+|**Validity Condition**| RFC Document|
+|----------------------|-------------|
+|i. All records should be unique (there should be no duplicates).| [2181](https://datatracker.ietf.org/doc/html/rfc2181)|
+|ii. A zone file should contain exactly one SOA record. | [1035](https://datatracker.ietf.org/doc/html/rfc1035) |
+|iii. The zone domain should be prefix to all the resource records domain name. | [1034](https://datatracker.ietf.org/doc/html/rfc1034)|
+|iv. If there is a CNAME type then no other type can exist and only one CNAME can exist for a domain name. |[1034](https://datatracker.ietf.org/doc/html/rfc1034)|
+|v. There can be only one DNAME record for a domain name.| [6672](https://datatracker.ietf.org/doc/html/rfc6672)|
+|vi. A domain name cannot have both DNAME and NS records unless there is an SOA record as well.| [6672](https://datatracker.ietf.org/doc/html/rfc6672)|
+|vii. No DNAME record domain name can be a prefix of another record’s domain name. |[6672](https://datatracker.ietf.org/doc/html/rfc6672)|
+|viii. No NS record can have a non-SOA domain name that is a prefix of another NS record. |[1034](https://datatracker.ietf.org/doc/html/rfc1034)|
+|ix. Glue records must exist for all NS records in a zone. |[1035](https://datatracker.ietf.org/doc/html/rfc1035)|
+----
+</details>
+
+Ferret leverages Zen to generate zone files that violate one of these conditions systematically. The formal model shown in the earlier image is well defined only for valid zone files, and therefore, we use [GRoot](https://github.com/dns-groot/groot) to generate queries for these invalid zone files.
+
+## Pre-generated Tests
+Ferret takes in the maximum length of domain name and the maximum number of records in the zone as an integer from the user. The tests generated for a given length bound are constant and do not change with each run. Therefore, we have released the tests generated for maximum bound of 4 in a separate GitHub repository - [FerretDataset](https://github.com/dns-groot/FerretDataset). 
+
+The dataset consists of both valid and invalid zone file tests. For valid zone files, the 12,673 tests in the [valid zone file tests](https://github.com/dns-groot/FerretDataset/tree/main/ValidZoneFileTests) folder are exhaustive _i.e.,_ there is a test for each possible path of the model for that bound. For the [invalid zone file tests](https://github.com/dns-groot/FerretDataset/tree/main/InvalidZoneFileTests), we have generated 900 ill-formed zone files, 100 violating each of the validity conditions.
+
+**Note**: Use the tests in the [FerretDataset](https://github.com/dns-groot/FerretDataset) with the maximum bound of 4 to skip the test generation set up and save time. For other length bounds, please follow the installation and test generation steps.
 ## Installation  
 
 ### Native Installation
 0. [Install `dotnet-sdk-5.0` for your OS.](https://docs.microsoft.com/en-us/dotnet/core/install/windows?tabs=net50)
 1. Build the project using<sup>[#](#note_1)</sup> (from `TestGenerator` directory):
-    ```console
+    ```bash
     ~/TestGenerator$ dotnet build --configuration Release
     ```
 <a name="note_1"><sup>#</sup></a> Alternatively, you could open the solution in Visual Studio in Windows and build using it.
 
 ### Using `docker`
 
-_**Note:** The docker image may consume  ~&hairsp;2&hairsp;GB of disk space._
+_**Note:** The docker image may consume ~&hairsp;2&hairsp;GB of disk space._
 
 If you have trouble with native installation, then using docker is  recommend as they have negligible performance overhead.
 (See [this report](http://domino.research.ibm.com/library/cyberdig.nsf/papers/0929052195DD819C85257D2300681E7B/$File/rc25482.pdf))
@@ -18,7 +80,7 @@ If you have trouble with native installation, then using docker is  recommend as
 0. [Get `docker` for your OS](https://docs.docker.com/install).
 
 1. Build the docker image locally (from `TestGenerator` directory): 
-    ```console
+    ```bash
     ~/TestGenerator$ docker build -t ferrettestgen .
    ```
 2. Run a container over the image using: `docker run -it --name=testgen  ferrettestgen`.<br>
@@ -28,7 +90,7 @@ If you have trouble with native installation, then using docker is  recommend as
 
 1. If a docker container will be used for the test generation, either
     - Copy the `Results` folder from the docker container to the host system after running the tool using the following command from the **host** terminal.
-        ```console
+        ```bash
         ~/TestGenerator$ docker cp testgen:/home/ferret/Ferret/TestGenerator/Results .
         ```
     - Or first create a `Results` folder in the host system and [bind mount](https://docs.docker.com/storage/bind-mounts) it while running the container:
@@ -37,7 +99,7 @@ If you have trouble with native installation, then using docker is  recommend as
         ```
         This would give you a `bash` shell within the container's `TestGenerator` directory.
 3. Run using:
-     ```console
+     ```bash
     ~/TestGenerator$ dotnet run --configuration Release --project Samples
     ```
     <details>
@@ -55,7 +117,7 @@ If you have trouble with native installation, then using docker is  recommend as
         --version          Display version information.
     ```
     - Pass the option using `dotnet run  --configuration Release --project Samples -- -l 3`.
-    - The `RRLookup` function generates tests which are a pair of zone and query.
+    - The `RRLookup` function generates valid tests which are a pair of zone and query.
     - The `InvalidZoneFiles` function generates invalid zone files by negating one validity constraint at a time while keeping the others true. For each negated constraint, the tool tries to generates 100 zone files. 
 
     </details>

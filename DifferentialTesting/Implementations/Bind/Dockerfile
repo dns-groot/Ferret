@@ -4,12 +4,6 @@ LABEL maintainer="sivakesava@cs.ucla.edu"
 
 RUN apt-get update 
 
-# RUN apt-get install -y \
-#   bind9 \
-#   bind9utils \
-#   bind9-doc \
-#   vim
-
 RUN apt-get install -y \
     autoconf \
     automake \
@@ -43,7 +37,6 @@ RUN cd /usr/local/etc && \
     rndc-confgen -a
 
 # Copy configuration files
-
 COPY Bind/named.conf /usr/local/etc/
 COPY db.campus.edu /usr/local/etc/
 

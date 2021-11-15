@@ -2,8 +2,6 @@ FROM ubuntu:bionic
 
 LABEL maintainer="sivakesava@cs.ucla.edu"
 
-# ENV DEBIAN_FRONTEND=noninteractive
-
 RUN apt-get update 
 RUN apt-get install -y \
     curl \

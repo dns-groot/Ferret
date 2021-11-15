@@ -31,7 +31,7 @@
     usage: main.py [-h] [-z ZONE_FILE_PATH] [-c CONTAINER_NAME]  [-p UNUSED_PORT] [-i {bind, nsd, knot, powerdns, coredns, yadifa, maradns, trustdns}]
 
     Gets an implementation to serve the input or default zone file.
-    Specify an image name and a port to start a fresh container (also container name if you want to assign a name)
+    Specify an image name and a port to start a new container (also container name if you want to assign a name)
       or only the name of an existing container to reuse it.
 
     optional arguments:

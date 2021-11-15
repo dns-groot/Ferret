@@ -1,3 +1,9 @@
+"""
+Script copies the input zone file and the necessary configuration file "yadifad.conf"
+into an existing or a new Yadifa container and starts the DNS server on container
+port 53, which is mapped to a host port.
+"""
+
 #!/usr/bin/env python3
 
 import pathlib
@@ -5,7 +11,7 @@ import subprocess
 import time
 
 
-yadifad = '''
+YADIFAD = '''
 <main>
         network-model               "single"
         logpath                     "/usr/local/var/log/yadifa"
@@ -71,31 +77,45 @@ yadifad = '''
 
 
 def run(zone_file, zone_domain, cname, port, restart, tag):
-
+    """
+    :param zone_file: Path to the Bind-style zone file
+    :param zone_domain: The domain name of the zone
+    :param cname: Container name
+    :param port: The host port which is mapped to the port 53 of the container
+    :param restart: Whether to load the input zone file in a new container
+                        or reuse the existing container
+    :param tag: The image tag to be used if restarting the container
+    """
     if restart:
         subprocess.run(['docker', 'container', 'rm', cname, '-f'],
-                       stdout=subprocess.PIPE)
+                       stdout=subprocess.PIPE, check=True)
         subprocess.run(['docker', 'run', '-dp', str(port)+':53/udp',
-                        '--name=' + cname, 'yadifa' + tag], stdout=subprocess.PIPE)
+                        '--name=' + cname, 'yadifa' + tag], stdout=subprocess.PIPE, check=True)
     else:
-        output = subprocess.run(['docker', 'exec', cname, 'yadifa',
-                                 'ctrl', '-y', 'controller-key:ControlDaemonKey', 'shutdown'], stdout=subprocess.PIPE)
+        # Stop the running server instance inside the container
+        output = subprocess.run(['docker', 'exec', cname, 'yadifa', 'ctrl', '-y',
+                                 'controller-key:ControlDaemonKey', 'shutdown'],
+                                stdout=subprocess.PIPE, check=False)
+        # Yadifa sometimes does not stop the server and might require sending the stop command again
         if output.returncode != 0:
             time.sleep(3)
-            subprocess.run(['docker', 'exec', cname, 'yadifa',
-                            'ctrl', '-y', 'controller-key:ControlDaemonKey', 'shutdown'], stdout=subprocess.PIPE)
-
+            subprocess.run(['docker', 'exec', cname, 'yadifa', 'ctrl', '-y',
+                            'controller-key:ControlDaemonKey', 'shutdown'],
+                           stdout=subprocess.PIPE, check=False)
+    # Copy the new zone file into the container
     subprocess.run(['docker', 'cp', zone_file,
-                    cname + ':/usr/local/var/zones/masters/'], stdout=subprocess.PIPE)
-
+                    cname + ':/usr/local/var/zones/masters/'], stdout=subprocess.PIPE, check=True)
+    # Create the Yadifa-specific configuration file
     with open('yadifad_'+cname+'.conf', 'w') as tmp:
-        tmp.write(yadifad.format(zone_domain, zone_file.name))
+        tmp.write(YADIFAD.format(zone_domain, zone_file.name))
+    # Copy the configuration file into the container as "yadifad.conf"
     subprocess.run(['docker', 'cp', 'yadifad_'+cname+'.conf',
-                    cname + ':/usr/local/etc/yadifad.conf'], stdout=subprocess.PIPE)
+                    cname + ':/usr/local/etc/yadifad.conf'], stdout=subprocess.PIPE, check=True)
     pathlib.Path('yadifad_'+cname+'.conf').unlink()
+    # Start the server
     server_start = subprocess.run(
-        ['docker', 'exec', cname, 'yadifad', '-d'], stdout=subprocess.PIPE)
+        ['docker', 'exec', cname, 'yadifad', '-d'], stdout=subprocess.PIPE, check=False)
     if server_start.returncode != 0:
         time.sleep(3)
         subprocess.run(['docker', 'exec', cname,
-                        'yadifad', '-d'], stdout=subprocess.PIPE)
+                        'yadifad', '-d'], stdout=subprocess.PIPE, check=False)

@@ -1,3 +1,9 @@
+"""
+Script copies the input zone file and the necessary configuration file "nsd.conf"
+into an existing or a new NSD container and starts the DNS server on container
+port 53, which is mapped to a host port.
+"""
+
 #!/usr/bin/env python3
 
 import pathlib
@@ -7,18 +13,28 @@ import subprocess
 
 
 def run(zone_file, zone_domain, cname, port, restart, tag):
-
+    """
+    :param zone_file: Path to the Bind-style zone file
+    :param zone_domain: The domain name of the zone
+    :param cname: Container name
+    :param port: The host port which is mapped to the port 53 of the container
+    :param restart: Whether to load the input zone file in a new container
+                        or reuse the existing container
+    :param tag: The image tag to be used if restarting the container
+    """
     if restart:
         subprocess.run(['docker', 'container', 'rm', cname, '-f'],
-                       stdout=subprocess.PIPE)
+                       stdout=subprocess.PIPE, check=True)
         subprocess.run(['docker', 'run', '-dp', str(port)+':53/udp',
-                        '--name=' + cname, 'nsd'+ tag], stdout=subprocess.PIPE)
+                        '--name=' + cname, 'nsd' + tag], stdout=subprocess.PIPE, check=True)
     else:
+        # Stop the running server instance inside the container
         subprocess.run(
-            ['docker', 'exec', cname, 'nsd-control', 'stop'], stdout=subprocess.PIPE)
-
+            ['docker', 'exec', cname, 'nsd-control', 'stop'], stdout=subprocess.PIPE, check=True)
+    # Copy the new zone file into the container
     subprocess.run(['docker', 'cp', zone_file,
-                    cname + ':/etc/nsd/zones'], stdout=subprocess.PIPE)
+                    cname + ':/etc/nsd/zones'], stdout=subprocess.PIPE, check=True)
+    # Create the NSD-specific configuration file
     nsd_conf = f'''
 server:
 
@@ -39,7 +55,10 @@ zone:
     '''
     with open('nsd_'+cname+'.conf', 'w') as tmp:
         tmp.write(nsd_conf)
+    # Copy the configuration file into the container as "nsd.conf"
     subprocess.run(['docker', 'cp', 'nsd_'+cname+'.conf',
-                    cname + ':/etc/nsd/nsd.conf'], stdout=subprocess.PIPE)
+                    cname + ':/etc/nsd/nsd.conf'], stdout=subprocess.PIPE, check=True)
     pathlib.Path('nsd_'+cname+'.conf').unlink()
-    subprocess.run(['docker', 'exec', cname, 'nsd-control', 'start'], stdout=subprocess.PIPE)
+    # Start the server
+    subprocess.run(['docker', 'exec', cname, 'nsd-control',
+                    'start'], stdout=subprocess.PIPE, check=True)

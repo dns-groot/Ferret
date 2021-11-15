@@ -1,16 +1,3 @@
-# FROM coredns/coredns
-
-# FROM ubuntu:bionic
-
-# COPY --from=0 /etc/ssl/certs /etc/ssl/certs
-# COPY --from=0 /coredns .
-
-# COPY db.campus.edu .
-# COPY Coredns/Corefile .
-
-# # Run eternal loop
-# CMD ["/bin/bash", "-c", "while :; do sleep 10; done"]
-
 FROM golang:1.14
 
 RUN apt-get update 

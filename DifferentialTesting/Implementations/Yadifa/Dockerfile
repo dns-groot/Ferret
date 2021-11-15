@@ -14,8 +14,6 @@ RUN apt-get install -y \
     make \
     vim
 
-# RUN curl -L https://github.com/asciiprod/yadifa/archive/master.zip -o master.zip
-
 RUN ln -sf /usr/bin/aclocal /usr/bin/aclocal-1.13
 RUN ln -sf /usr/bin/automake /usr/bin/automake-1.13
 
