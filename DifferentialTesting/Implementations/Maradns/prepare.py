@@ -14,9 +14,10 @@ import subprocess
 # Start MaraDNS from the terminal inside the container using `maradns` to see the logs on stdout.
 
 
-def run(zone_file, _, cname, port, restart, tag):
+def run(zone_file, zone_domain, cname, port, restart, tag):
     """
     :param zone_file: Path to the Bind-style zone file
+    :param zone_domain: The domain name of the zone
     :param cname: Container name
     :param port: The host port which is mapped to the port 53 of the container
     :param restart: Whether to load the input zone file in a new container
@@ -39,8 +40,8 @@ def run(zone_file, _, cname, port, restart, tag):
     # It has to be run in the container to get the container interface IP to which the
     # DNS server has to bind.
     mararc = 'ipaddr=\\"$(hostname -i)\\"\necho "ipv4_bind_addresses = $ipaddr"\n'
-    mararc += 'echo \'chroot_dir = "/etc/maradns"\'\necho \'csv2 = {{}}\'\n'
-    mararc += 'echo \'csv2["{zone_domain}"] = "{zone_file.name + ".csv2"}"\''
+    mararc += 'echo \'chroot_dir = "/etc/maradns"\'\necho \'csv2 = {}\'\n'
+    mararc += f'echo \'csv2["{zone_domain}"] = "{zone_file.name + ".csv2"}"\''
 
     with open(cname + '_mararc.sh', 'w') as file_pointer:
         file_pointer.write(mararc)
