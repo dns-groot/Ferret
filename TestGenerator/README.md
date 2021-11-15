@@ -61,7 +61,7 @@ Ferret takes in the maximum length of the domain name and the maximum number of 
 
 The dataset consists of both valid and invalid zone file tests. For valid zone files, the 12,673 tests in the [valid zone file tests](https://github.com/dns-groot/FerretDataset/tree/main/ValidZoneFileTests) folder are exhaustive _i.e.,_ there is a test for each possible path of the model for that bound. For the [invalid zone file tests](https://github.com/dns-groot/FerretDataset/tree/main/InvalidZoneFileTests), we have generated 900 ill-formed zone files, 100 violating each of the validity conditions.
 
-**Note**: Use the tests in the [FerretDataset](https://github.com/dns-groot/FerretDataset) that were generated with the maximum bound of 4 to skip this module and save time. For other bounds, please follow the installation and test generation steps.
+**Note**: Use the tests in the [FerretDataset](https://github.com/dns-groot/FerretDataset) that were generated with the maximum bound of 4 to skip this module to save time and go directly to the [Differential testing](../DifferentialTesting/) module. For other bounds, please follow the installation and test generation steps.
 ## Installation  
 
 ### Native Installation
@@ -100,7 +100,7 @@ If you have trouble with native installation, then using docker is  recommend as
         ~/TestGenerator$ docker run -v ${PWD}/Results:/home/ferret/Ferret/TestGenerator/Results -it --name=testgen ferrettestgen
         ```
         This would give you a `bash` shell within the container's `TestGenerator` directory.
-3. Run using:
+2. Run using:
      ```bash
     ~/TestGenerator$ dotnet run --configuration Release --project Samples
     ```
@@ -124,7 +124,9 @@ If you have trouble with native installation, then using docker is  recommend as
 
     </details>
    
-4. _Est. Time:_ 
+3. _Est. Time:_ 
     - Ferret takes approximately 6 hours for `RRLookup` with a maximum bound of 4 to generate 12,673 tests. Each test consists of a well-formed zone file and a query that together causes execution to explore a particular RFC behavior.
     - Ferret takes approximately 20 minutes for `InvalidZoneFiles` generation to generate 900 ill-formed zone files, 100 violating each of the validity conditions.
+
+After the tests are generated, go to the [Differential testing](../DifferentialTesting/) module.
 
