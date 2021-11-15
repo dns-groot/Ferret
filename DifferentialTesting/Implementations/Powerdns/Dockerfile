@@ -2,15 +2,7 @@ FROM ubuntu:bionic
 
 LABEL maintainer="sivakesava@cs.ucla.edu"
 
-# ENV DEBIAN_FRONTEND=noninteractive
-
 RUN apt-get update 
-# RUN apt-get install -y \
-#   pdns-server \
-#   dnsutils \
-#   dos2unix \
-#   rsyslog \
-#   vim 
 
 RUN apt install -y \
     libcurl4-openssl-dev \
@@ -48,6 +40,7 @@ ARG latest=false
 RUN if [ "$latest" = "false" ] ; then cd pdns && git reset --hard a03aaad7554483ee6efe72a81eda00a9d1a94fe5 ; fi
 
 RUN cd pdns && \
+    sed -i 's/docutils!=0.15/docutils!=0.15,<0.18/g' docs/requirements.txt pdns/dnsdistdist/docs/requirements.txt pdns/recursordist/docs/requirements.txt && \
     autoreconf -vi && \
     ./configure --with-modules="bind" --disable-lua-records && \
     make && \
