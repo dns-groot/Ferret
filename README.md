@@ -18,7 +18,7 @@ Follow the steps mentioned in test case generation [README](TestGenerator/) to g
 
 ## Bugs Found
 
-Legend - Fixed: ✅&nbsp;&nbsp;&nbsp;&nbsp;Confirmed: ☑️&nbsp;&nbsp;&nbsp;&nbsp;Bug but not fixing it: ❕
+Legend - Fixed: ✅&nbsp;&nbsp;&nbsp;&nbsp;Confirmed: ☑️&nbsp;&nbsp;&nbsp;&nbsp;Bug but not fixing it: :warning: 
 
 ### Bugs found with Zen generated zone files and queries
 
@@ -115,7 +115,7 @@ Legend - Fixed: ✅&nbsp;&nbsp;&nbsp;&nbsp;Confirmed: ☑️&nbsp;&nbsp;&nbsp;&n
            <th rowspan=6 align='center'><a href='https://github.com/coredns/coredns'>CoreDns</a></th>
            <td><a href='https://github.com/coredns/coredns/issues/4374'><code>NXDOMAIN</code> for an existing domain</a></td>
            <td align='left'>Wrong <code>RCODE</code></td>
-           <td align='center'> ❕ </td>
+           <td align='center'> ⚠️ </td>
         </tr>
         <tr>
            <td><a href='https://github.com/coredns/coredns/issues/4288'>Wrong <code>RCODE</code> for <code>CNAME</code> target</a></td>
@@ -162,12 +162,12 @@ Legend - Fixed: ✅&nbsp;&nbsp;&nbsp;&nbsp;Confirmed: ☑️&nbsp;&nbsp;&nbsp;&n
            <th rowspan=2 align='center'><a href='https://github.com/samboy/MaraDNS'>Maradns<a href="README.md/#note_1"><sup>#</sup></a></a></th>
            <td><a href='https://github.com/samboy/MaraDNS/issues/85'><code>AA</code> flag set for zone cut <code>NS</code> RRs</a></td>
            <td align='left'>Wrong Flag</td>
-           <td align='center'>❕</td>
+           <td align='center'>:warning: </td>
         </tr>
         <tr>
            <td><a href='https://github.com/samboy/MaraDNS/issues/84'>Glue records returned with <code>AA</code> flag</a></td>
            <td align='left'>Wrong Flag</td>
-           <td align='center'>❕</td>
+           <td align='center'> ⚠️</td>
         </tr>
         <tr>
            <th rowspan=4 align='center'><a href='https://github.com/bluejekyll/trust-dns'>TrustDns<a href="README.md/#note_1"><sup>#</sup></a></a></th>
