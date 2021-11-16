@@ -11,6 +11,7 @@ RUN apt-get install -y \
     gcc \
     git \
     libcap-dev \
+    libnghttp2-dev \
     libtool \
     libtool-bin \
     libuv1-dev \
