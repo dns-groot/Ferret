@@ -20,8 +20,6 @@ Follow the steps mentioned in test case generation [README](TestGenerator/) to g
 
 Legend - Fixed: ✅&nbsp;&nbsp;&nbsp;&nbsp;Confirmed: ☑️&nbsp;&nbsp;&nbsp;&nbsp;Bug but not fixing it: :warning: 
 
-### Bugs found with Zen generated zone files and queries
-
 <table>
     <thead>
         <tr>

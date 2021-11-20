@@ -10,7 +10,7 @@ import pathlib
 import subprocess
 
 
-def run(zone_file, zone_domain, cname, port, restart, tag):
+def run(zone_file: pathlib.Path, zone_domain: str, cname: str, port: int, restart: bool, tag: str) -> None:
     """
     :param zone_file: Path to the Bind-style zone file
     :param zone_domain: The domain name of the zone
@@ -22,17 +22,17 @@ def run(zone_file, zone_domain, cname, port, restart, tag):
     """
     if restart:
         subprocess.run(['docker', 'container', 'rm', cname, '-f'],
-                       stdout=subprocess.PIPE, check=True)
+                       stdout=subprocess.PIPE, check=False)
         subprocess.run(['docker', 'run', '-dp', str(port)+':53/udp',
-                        '--name=' + cname, 'trustdns' + tag], stdout=subprocess.PIPE, check=True)
+                        '--name=' + cname, 'trustdns' + tag], stdout=subprocess.PIPE, check=False)
     else:
         # Kill the running server instance inside the container
         subprocess.run(
-            ['docker', 'exec', cname, 'pkill', 'named'], stdout=subprocess.PIPE, check=True)
+            ['docker', 'exec', cname, 'pkill', 'named'], stdout=subprocess.PIPE, check=False)
     # Copy the new zone file into the container
     subprocess.run(['docker', 'cp', zone_file, cname +
                     ':trust-dns/tests/test-data/named_test_configs/'],
-                   stdout=subprocess.PIPE, check=True)
+                   stdout=subprocess.PIPE, check=False)
     # Create the TrustDNS-specific configuration file
     config = f'[[zones]]\nzone = "{zone_domain}"\nzone_type = "Primary"\nfile = "{zone_file.name}"'
     with open(cname + '_config.toml', 'w') as file_pointer:
@@ -40,10 +40,10 @@ def run(zone_file, zone_domain, cname, port, restart, tag):
     # Copy the configuration file into the container as "config.toml"
     subprocess.run(['docker', 'cp', cname + '_config.toml', cname +
                     ':trust-dns/tests/test-data/named_test_configs/config.toml'],
-                   stdout=subprocess.PIPE, check=True)
+                   stdout=subprocess.PIPE, check=False)
     pathlib.Path(cname + '_config.toml').unlink()
     # Start the server
     subprocess.run(['docker', 'exec', '-d', cname, '/trust-dns/target/release/named', '-c',
                     '/trust-dns/tests/test-data/named_test_configs/config.toml',
                     '-z', '/trust-dns/tests/test-data/named_test_configs'],
-                   stdout=subprocess.PIPE, check=True)
+                   stdout=subprocess.PIPE, check=False)

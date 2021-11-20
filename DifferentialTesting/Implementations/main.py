@@ -25,6 +25,7 @@ import pathlib
 import subprocess
 import sys
 from argparse import ArgumentParser, FileType, RawTextHelpFormatter
+from typing import Optional
 
 from Bind.prepare import run as bind
 from Coredns.prepare import run as coredns
@@ -36,7 +37,7 @@ from Trustdns.prepare import run as trustdns
 from Yadifa.prepare import run as yadifa
 
 
-def load_and_serve_zone_file(zone_file, image, cname, port, latest):
+def load_and_serve_zone_file(zone_file: pathlib.Path, image: Optional[str], cname: Optional[str], port: Optional[int], latest: bool) -> None:
     """
     :param zone_file: Path to the Bind-style zone file
     :param image: The image name of the implementation
@@ -51,7 +52,7 @@ def load_and_serve_zone_file(zone_file, image, cname, port, latest):
     if image:
         # Check if the docker image exists.
         check_image = subprocess.run(
-            ['docker', 'inspect', image], stdout=subprocess.PIPE, check=True)
+            ['docker', 'inspect', image], stdout=subprocess.PIPE, check=False)
         # Exit from the module if the user input implementation image name does not exist
         if check_image.returncode != 0:
             sys.exit(
@@ -68,7 +69,7 @@ def load_and_serve_zone_file(zone_file, image, cname, port, latest):
 
     # Check if a container with the input name is running.
     check_status = subprocess.run(
-        ['docker', 'ps', '--format', '"{{.Names}}"'], stdout=subprocess.PIPE, check=True)
+        ['docker', 'ps', '--format', '"{{.Names}}"'], stdout=subprocess.PIPE, check=False)
     output = check_status.stdout.decode("utf-8")
     if check_status.returncode != 0:
         sys.exit(f'Error in executing Docker ps command: {output}')
@@ -79,10 +80,10 @@ def load_and_serve_zone_file(zone_file, image, cname, port, latest):
                     f'Error: Cannot start a container with name {cname} as it exists already')
             else:
                 start_container = subprocess.run(['docker', 'run', '-dp', str(
-                    port)+':53/udp', '--name=' + cname, image], stdout=subprocess.PIPE, check=True)
+                    port)+':53/udp', '--name=' + cname, image], stdout=subprocess.PIPE, check=False)
         else:
             start_container = subprocess.run(['docker', 'run', '-dp', str(port)+':53/udp',
-                                              image], stdout=subprocess.PIPE, check=True)
+                                              image], stdout=subprocess.PIPE, check=False)
         if start_container.returncode != 0:
             sys.exit(f'Unable to a start a container for {image}')
         cid = start_container.stdout.decode("utf-8").strip()
@@ -92,7 +93,7 @@ def load_and_serve_zone_file(zone_file, image, cname, port, latest):
     # Get name of the container
     get_name = subprocess.run(['docker', 'inspect', '--format',
                                '"{{.Name}} {{.Config.Image}}"', cid],
-                              stdout=subprocess.PIPE, check=True)
+                              stdout=subprocess.PIPE, check=False)
     if get_name.returncode != 0:
         sys.exit(
             f'Error: Docker inspect failed when getting name for the container with id: {cid}')

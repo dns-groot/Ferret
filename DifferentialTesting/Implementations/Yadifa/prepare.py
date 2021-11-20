@@ -76,7 +76,7 @@ YADIFAD = '''
 '''
 
 
-def run(zone_file, zone_domain, cname, port, restart, tag):
+def run(zone_file: pathlib.Path, zone_domain: str, cname: str, port: int, restart: bool, tag: str) -> None:
     """
     :param zone_file: Path to the Bind-style zone file
     :param zone_domain: The domain name of the zone
@@ -88,9 +88,9 @@ def run(zone_file, zone_domain, cname, port, restart, tag):
     """
     if restart:
         subprocess.run(['docker', 'container', 'rm', cname, '-f'],
-                       stdout=subprocess.PIPE, check=True)
+                       stdout=subprocess.PIPE, check=False)
         subprocess.run(['docker', 'run', '-dp', str(port)+':53/udp',
-                        '--name=' + cname, 'yadifa' + tag], stdout=subprocess.PIPE, check=True)
+                        '--name=' + cname, 'yadifa' + tag], stdout=subprocess.PIPE, check=False)
     else:
         # Stop the running server instance inside the container
         output = subprocess.run(['docker', 'exec', cname, 'yadifa', 'ctrl', '-y',
@@ -104,13 +104,13 @@ def run(zone_file, zone_domain, cname, port, restart, tag):
                            stdout=subprocess.PIPE, check=False)
     # Copy the new zone file into the container
     subprocess.run(['docker', 'cp', zone_file,
-                    cname + ':/usr/local/var/zones/masters/'], stdout=subprocess.PIPE, check=True)
+                    cname + ':/usr/local/var/zones/masters/'], stdout=subprocess.PIPE, check=False)
     # Create the Yadifa-specific configuration file
     with open('yadifad_'+cname+'.conf', 'w') as tmp:
         tmp.write(YADIFAD.format(zone_domain, zone_file.name))
     # Copy the configuration file into the container as "yadifad.conf"
     subprocess.run(['docker', 'cp', 'yadifad_'+cname+'.conf',
-                    cname + ':/usr/local/etc/yadifad.conf'], stdout=subprocess.PIPE, check=True)
+                    cname + ':/usr/local/etc/yadifad.conf'], stdout=subprocess.PIPE, check=False)
     pathlib.Path('yadifad_'+cname+'.conf').unlink()
     # Start the server
     server_start = subprocess.run(
