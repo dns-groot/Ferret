@@ -256,16 +256,16 @@
             var nxResponse = function.Find((rrs, q, z, res) => And(
                RRLookupConstraints(z, q, rrs),
                rrs.At(0).Value().GetRName() == q.GetQName(),
-               res.GetResTag() == Tag.PNX), listSize: 3);
+               res.GetResTag() == Tag.R2), listSize: 3);
             Assert.IsFalse(nxResponse.HasValue);
 
-            // When the query type is CNAME there should be case where it is returned with ANS (EAA) instead of ANSQ (EAQ).
+            // When the query type is CNAME there should be case where it is returned with ANS (E1) instead of ANSQ (E2).
             var cnameTypeMatch = function.Find((rrs, q, z, res) => And(
                RRLookupConstraints(z, q, rrs),
                rrs.At(0).Value().GetRName() == q.GetQName(),
                q.GetQType() == rrs.At(0).Value().GetRType(),
                q.GetQType() == RecordType.CNAME,
-               res.GetResTag() == Tag.EAA), listSize: 3);
+               res.GetResTag() == Tag.E1), listSize: 3);
 
             Assert.IsTrue(cnameTypeMatch.HasValue);
             var result = function.Evaluate(cnameTypeMatch.Value.Item1, cnameTypeMatch.Value.Item2, cnameTypeMatch.Value.Item3);
@@ -280,19 +280,19 @@
                Not(res.IsValidResponse())), listSize: 3);
             Assert.IsFalse(invalidResponse.HasValue);
 
-            // When the query type is CNAME the response is never a ANSQ (EAQ) for valid inputs.
+            // When the query type is CNAME the response is never a ANSQ (E2) for valid inputs.
             var cnameTypeAnsQ = function.Find((rrs, q, z, res) => And(
                RRLookupConstraints(z, q, rrs),
                rrs.At(0).Value().GetRName() == q.GetQName(),
                q.GetQType() == RecordType.CNAME,
-               res.GetResTag() == Tag.EAQ), listSize: 3);
+               res.GetResTag() == Tag.E2), listSize: 3);
             Assert.IsFalse(cnameTypeAnsQ.HasValue);
 
-            // Find a ANSQ (EAQ) response for valid inputs.
+            // Find a ANSQ (E2) response for valid inputs.
             var ansqInputs = function.Find((rrs, q, z, res) => And(
                RRLookupConstraints(z, q, rrs),
                rrs.At(0).Value().GetRName() == q.GetQName(),
-               res.GetResTag() == Tag.EAQ), listSize: 3);
+               res.GetResTag() == Tag.E2), listSize: 3);
             Assert.IsTrue(ansqInputs.HasValue);
             result = function.Evaluate(ansqInputs.Value.Item1, ansqInputs.Value.Item2, ansqInputs.Value.Item3);
             Assert.IsTrue(ansqInputs.Value.Item1.Count() == 1);
@@ -314,14 +314,14 @@
             var nxResponse = function.Find((rrs, q, z, res) => And(
                RRLookupConstraints(z, q, rrs),
                Utils.IsDomainWildcardMatch(q.GetQName(), rrs.At(0).Value().GetRName()),
-               res.GetResTag() == Tag.PNX), listSize: 3);
+               res.GetResTag() == Tag.R2), listSize: 3);
             Assert.IsFalse(nxResponse.HasValue);
 
-            // Find a ANSQ (WQR) response for valid inputs.
+            // Find a ANSQ (W2) response for valid inputs.
             var ansqInputs = function.Find((rrs, q, z, res) => And(
                RRLookupConstraints(z, q, rrs),
                Utils.IsDomainWildcardMatch(q.GetQName(), rrs.At(0).Value().GetRName()),
-               res.GetResTag() == Tag.WQR), listSize: 3);
+               res.GetResTag() == Tag.W2), listSize: 3);
             Assert.IsTrue(ansqInputs.HasValue);
             var result = function.Evaluate(ansqInputs.Value.Item1, ansqInputs.Value.Item2, ansqInputs.Value.Item3);
             Assert.IsTrue(ansqInputs.Value.Item1.Count() == 1);

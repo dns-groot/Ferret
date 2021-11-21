@@ -84,7 +84,7 @@
             var dnameRecord = relevantRRs.Where(r => r.GetRType() == RecordType.DNAME);
             var d = dnameRecord.At(0).Value().GetRData().GetValue().Append(q.GetQName().GetValue().SplitAt(dnameRecord.At(0).Value().GetRName().GetValue().Length() - 1).Item2());
             var synCname = ResourceRecord.Create(q.GetQName(), RecordType.CNAME, DomainName.Create(d));
-            return Response.Create(Tag.DQR, dnameRecord.AddBack(synCname), Some(Query.Create(DomainName.Create(d), q.GetQType())));
+            return Response.Create(Tag.D1, dnameRecord.AddBack(synCname), Some(Query.Create(DomainName.Create(d), q.GetQType())));
         }
 
         /// <summary>
@@ -114,9 +114,9 @@
                         If(
                             And(types.Any(t => t == RecordType.NS), Not(types.Any(t => t == RecordType.SOA))),
                             // DNAME ∉ 𝑇 , NS ∈ 𝑇 , SOA ∉ 𝑇
-                            Response.Create(Tag.PRE, Delegation(relevantRecords, z), Null<Query>()),
+                            Response.Create(Tag.R1, Delegation(relevantRecords, z), Null<Query>()),
                             // otherwise
-                            Response.Create(Tag.PNX, new List<ResourceRecord>(), Null<Query>())))));
+                            Response.Create(Tag.R2, new List<ResourceRecord>(), Null<Query>())))));
         }
 
         private static Zen<IList<ResourceRecord>> Delegation(Zen<IList<ResourceRecord>> relevantRecords, Zen<Zone> z)
@@ -154,13 +154,13 @@
                     If(
                         types.Where(t => t == RecordType.CNAME).IsEmpty(),
                         // otherwise
-                        Response.Create(Tag.EAE, new List<ResourceRecord>(), Null<Query>()),
+                        Response.Create(Tag.E3, new List<ResourceRecord>(), Null<Query>()),
                         // Authoritative(𝑇), ty(𝑞) ∉ 𝑇 , CNAME ∈ 𝑇 , 𝑅 = {𝑟}
-                        Response.Create(Tag.EAQ, relevantRecords, Some(Query.Create(relevantRecords.At(0).Value().GetRData(), q.GetQType())))),
+                        Response.Create(Tag.E2, relevantRecords, Some(Query.Create(relevantRecords.At(0).Value().GetRData(), q.GetQType())))),
                     // Authoritative(𝑇), ty(𝑞) ∈ 𝑇
-                    Response.Create(Tag.EAA, relevantRecords.Where(r => r.GetRType() == q.GetQType()), Null<Query>())),
+                    Response.Create(Tag.E1, relevantRecords.Where(r => r.GetRType() == q.GetQType()), Null<Query>())),
                 // ¬Authoritative(𝑇 )
-                Response.Create(Tag.ERE, Delegation(relevantRecords, z), Null<Query>()));
+                Response.Create(Tag.E4, Delegation(relevantRecords, z), Null<Query>()));
         }
 
         private static Zen<IList<ResourceRecord>> RecordSynthesis(Zen<IList<ResourceRecord>> records, Zen<DomainName> d)
@@ -184,11 +184,11 @@
                 If(
                     types.Where(t => t == RecordType.CNAME).IsEmpty(),
                     // otherwise
-                    Response.Create(Tag.WEA, new List<ResourceRecord>(), Null<Query>()),
+                    Response.Create(Tag.W3, new List<ResourceRecord>(), Null<Query>()),
                     // ty(𝑞) ∉ 𝑇 , CNAME ∈ 𝑇 , 𝑅 = {𝑟}
-                    Response.Create(Tag.WQR, RecordSynthesis(relevantRecords, q.GetQName()), Some(Query.Create(relevantRecords.At(0).Value().GetRData(), q.GetQType())))),
+                    Response.Create(Tag.W2, RecordSynthesis(relevantRecords, q.GetQName()), Some(Query.Create(relevantRecords.At(0).Value().GetRData(), q.GetQType())))),
                 // ty(𝑞) ∈ 𝑇
-                Response.Create(Tag.WSA, RecordSynthesis(relevantRecords.Where(r => r.GetRType() == q.GetQType()), q.GetQName()), Null<Query>()));
+                Response.Create(Tag.W1, RecordSynthesis(relevantRecords.Where(r => r.GetRType() == q.GetQType()), q.GetQName()), Null<Query>()));
         }
     }
 }

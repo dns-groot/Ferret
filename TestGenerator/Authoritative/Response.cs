@@ -14,52 +14,52 @@
         /// <summary>
         /// ExactMatch Authoritative Answer.
         /// </summary>
-        EAA,
+        E1,
 
         /// <summary>
         /// ExactMatch Authoritative Query rewrite.
         /// </summary>
-        EAQ,
+        E2,
 
         /// <summary>
         /// ExactMatch Authoritative Empty answer.
         /// </summary>
-        EAE,
+        E3,
 
         /// <summary>
         /// ExactMatch REference.
         /// </summary>
-        ERE,
+        E4,
 
         /// <summary>
         /// Wildcard Synthesized Answer.
         /// </summary>
-        WSA,
+        W1,
 
         /// <summary>
         /// Wildcard Query Rewrite.
         /// </summary>
-        WQR,
+        W2,
 
         /// <summary>
         /// Wildcard Empty Answer.
         /// </summary>
-        WEA,
+        W3,
 
         /// <summary>
         /// DNAME Query Rewrite.
         /// </summary>
-        DQR,
+        D1,
 
         /// <summary>
         /// Prefix REference.
         /// </summary>
-        PRE,
+        R1,
 
         /// <summary>
         /// Prefix Non-existent.
         /// </summary>
-        PNX,
+        R2,
 
         /// <summary>
         /// Refused.
@@ -155,29 +155,29 @@
             IList<Zen<bool>> predicates = new List<Zen<bool>>();
             predicates.Add(
                 Or(
-                    res.GetResTag() == Tag.EAA,
-                    res.GetResTag() == Tag.EAQ,
-                    res.GetResTag() == Tag.EAE,
-                    res.GetResTag() == Tag.ERE,
-                    res.GetResTag() == Tag.WSA,
-                    res.GetResTag() == Tag.WQR,
-                    res.GetResTag() == Tag.WEA,
-                    res.GetResTag() == Tag.DQR,
-                    res.GetResTag() == Tag.PRE,
-                    res.GetResTag() == Tag.PNX,
+                    res.GetResTag() == Tag.E1,
+                    res.GetResTag() == Tag.E2,
+                    res.GetResTag() == Tag.E3,
+                    res.GetResTag() == Tag.E4,
+                    res.GetResTag() == Tag.W1,
+                    res.GetResTag() == Tag.W2,
+                    res.GetResTag() == Tag.W3,
+                    res.GetResTag() == Tag.D1,
+                    res.GetResTag() == Tag.R1,
+                    res.GetResTag() == Tag.R2,
                     res.GetResTag() == Tag.SERVFAIL,
                     res.GetResTag() == Tag.REFUSED));
 
-            // If the tag is ANSQ (EAQ, WQR, DQR) then there has to be a valid rewritten query.
-            predicates.Add(Implies(Or(res.GetResTag() == Tag.EAQ, res.GetResTag() == Tag.WQR, res.GetResTag() == Tag.DQR), And(res.GetRewrittenQuery().HasValue(), res.GetRewrittenQuery().Value().IsValidQuery())));
+            // If the tag is ANSQ (E2, W2, D1) then there has to be a valid rewritten query.
+            predicates.Add(Implies(Or(res.GetResTag() == Tag.E2, res.GetResTag() == Tag.W2, res.GetResTag() == Tag.D1), And(res.GetRewrittenQuery().HasValue(), res.GetRewrittenQuery().Value().IsValidQuery())));
 
             // If the tag is not ANSQ then the rewritten query has to be empty.
-            predicates.Add(Implies(And(res.GetResTag() != Tag.EAQ, res.GetResTag() != Tag.WQR, res.GetResTag() != Tag.DQR), Not(res.GetRewrittenQuery().HasValue())));
+            predicates.Add(Implies(And(res.GetResTag() != Tag.E2, res.GetResTag() != Tag.W2, res.GetResTag() != Tag.D1), Not(res.GetRewrittenQuery().HasValue())));
 
             // If the tag is NX or SERVFAIL or REFUSED then the records set should be empty.
             predicates.Add(Implies(
                 Or(
-                    res.GetResTag() == Tag.PNX,
+                    res.GetResTag() == Tag.R2,
                     res.GetResTag() == Tag.SERVFAIL,
                     res.GetResTag() == Tag.REFUSED),
                 res.GetResRecords().IsEmpty()));
@@ -185,11 +185,11 @@
             // If the tag is REF or ANSQ then the records set should be non-empty.
             predicates.Add(Implies(
                Or(
-                   res.GetResTag() == Tag.ERE,
-                   res.GetResTag() == Tag.PRE,
-                   res.GetResTag() == Tag.EAQ,
-                   res.GetResTag() == Tag.WQR,
-                   res.GetResTag() == Tag.DQR),
+                   res.GetResTag() == Tag.E4,
+                   res.GetResTag() == Tag.R1,
+                   res.GetResTag() == Tag.E2,
+                   res.GetResTag() == Tag.W2,
+                   res.GetResTag() == Tag.D1),
                Not(res.GetResRecords().IsEmpty())));
 
             return predicates.Aggregate((a, b) => And(a, b));
