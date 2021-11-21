@@ -204,11 +204,11 @@
         public static Zen<IList<ResourceRecord>> GetRecords(this Zen<Zone> z) => z.GetField<Zone, IList<ResourceRecord>>("Records");
 
         /// <summary>
-        /// Returns a list of  conditions for a well-formed zone.
+        /// Returns a list of conditions for a zone to be considered well-formed for RR Lookup.
         /// </summary>
         /// <param name="z">The zone.</param>
         /// <returns>A boolean.</returns>
-        public static IList<Zen<bool>> ValidZoneConditions(this Zen<Zone> z)
+        public static IList<Zen<bool>> ZoneValidityConditionsForRRLookup(this Zen<Zone> z)
         {
             IList<Zen<bool>> predicates = new List<Zen<bool>>();
 
@@ -254,6 +254,66 @@
 
             // NS answer should not be related to a CNAME or a DNAME record. (RFC 2181)
             predicates.Add(ZoneUtils.NsDnameCname(z.GetRecords().Where(r => r.GetRType() == RecordType.NS), z.GetRecords()));
+
+            // Glue records have to exist for both in-domain and sibling domain. (In-bailiwick rule of RFC 8499)
+            predicates.Add(ZoneUtils.GlueRecords(z.GetRecords().Where(r => r.GetRType() == RecordType.NS), z.GetRecords(), zoneDomain));
+
+            return predicates;
+        }
+
+        /// <summary>
+        /// Whether a zone is well-formed for Query Lookup.
+        /// </summary>
+        /// <param name="z">The zone.</param>
+        /// <returns>A boolean.</returns>
+        public static Zen<bool> IsValidZoneForRRLookup(this Zen<Zone> z)
+        {
+            return z.ZoneValidityConditionsForRRLookup().Aggregate((a, b) => And(a, b));
+        }
+
+        /// <summary>
+        /// Returns a list of conditions for a well-formed zone (Without additional prefix-closed and redundant constraints present in RRLookup).
+        /// Mainly use to generate invalid zone files by asking Zen to generate zone files where cosntraint i,j.. are falsified and all the
+        /// reamining contraints hold.
+        /// </summary>
+        /// <param name="z">The zone.</param>
+        /// <returns>A boolean.</returns>
+        public static IList<Zen<bool>> ValidZoneConditions(this Zen<Zone> z)
+        {
+            IList<Zen<bool>> predicates = new List<Zen<bool>>();
+
+            // All the records should be valid.
+            predicates.Add(z.GetRecords().All(ResourceRecordExtensions.IsValidRecord));
+
+            // All the records should be unique. (RFC 2181)
+            predicates.Add(ZoneUtils.RecordUniqueness(z.GetRecords(), z.GetRecords()));
+
+            // Zone should have exactly one SOA record. (Condition 1; RFC 1035)
+            predicates.Add(z.GetRecords().Where(r => r.GetRType() == RecordType.SOA).Length() == 1);
+
+            var zoneDomain = z.GetRecords().Where(r => r.GetRType() == RecordType.SOA).At(0).Value().GetRName();
+
+            // The zone domain should be prefix to all the resource records domain name. (Condition 3; RFC1034)
+            predicates.Add(Implies(
+                z.GetRecords().Where(r => r.GetRType() == RecordType.SOA).At(0).HasValue(),
+                z.GetRecords().All(r => Utils.IsPrefix(zoneDomain, r.GetRName()))));
+
+            // There can be only one CNAME record for a domain name and also there can be no other type if there is a CNAME record. (Conditions 5 & 6; RFC 1034)
+            predicates.Add(ZoneUtils.SingleCname(z.GetRecords().Where(r => r.GetRType() == RecordType.CNAME), z.GetRecords()));
+
+            Zen<IList<ResourceRecord>> dnameRecords = z.GetRecords().Where(r => r.GetRType() == RecordType.DNAME);
+
+            // There can be only one DNAME record for a domain name. (Condition 7; RFC 6672)
+            predicates.Add(ZoneUtils.UniqueDname(dnameRecords, z.GetRecords()));
+
+            // A domain name cannot have both DNAME and NS records unless there is an SOA record. (Condition 8; RFC 6672)
+            predicates.Add(ZoneUtils.DnameNs(dnameRecords, z.GetRecords(), zoneDomain));
+
+            // If there is a DNAME record for a domain name 𝑑, then there cannot be any records for domain names for which 𝑑 is a proper prefix. (Condition 9; RFC 6672)
+            predicates.Add(ZoneUtils.DnamePrefix(dnameRecords, z.GetRecords()));
+
+            // If there is an NS record for a domain name 𝑑 but not an SOA record, then there cannot be any NS records for domain names for which 𝑑 is a proper prefix. (Condition 10; RFC 1034)
+            predicates.Add(ZoneUtils.NsPrefix(z.GetRecords().Where(r => r.GetRType() == RecordType.NS), z.GetRecords(), zoneDomain));
 
             // Glue records have to exist for both in-domain and sibling domain. (In-bailiwick rule of RFC 8499)
             predicates.Add(ZoneUtils.GlueRecords(z.GetRecords().Where(r => r.GetRType() == RecordType.NS), z.GetRecords(), zoneDomain));

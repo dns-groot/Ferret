@@ -69,7 +69,7 @@
         public static Zen<Option<Response>> ServerLookup(Zen<Query> q, Zen<Zone> z)
         {
             return If(
-                And(z.IsValidZone(), q.IsValidQuery()),
+                And(z.IsValidZoneForRRLookup(), q.IsValidQuery()),
                 If(
                     Utils.IsPrefix(z.GetRecords().Where(r => r.GetRType() == RecordType.SOA).At(0).Value().GetRName(), q.GetQName()),
                     // N (𝑍, 𝑞) = {𝑧} (Here, there is only one zone file, so 𝑍 = {𝑧})

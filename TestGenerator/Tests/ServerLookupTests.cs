@@ -140,7 +140,7 @@
             Assert.IsTrue(cname.Equals(result.First()));
 
             var emptyRRs = function.Find((q, z, rrs) => And(
-                z.IsValidZone(),
+                z.IsValidZoneForRRLookup(),
                 q.IsValidQuery(),
                 Utils.IsPrefix(z.GetRecords().Where(r => r.GetRType() == RecordType.SOA).At(0).Value().GetRName(), q.GetQName()),
                 rrs.IsEmpty()), listSize: 3);
@@ -148,7 +148,7 @@
 
             // All the relevant records should have the same domain name.
             var differentNames = function.Find((q, z, rrs) => And(
-                z.IsValidZone(),
+                z.IsValidZoneForRRLookup(),
                 q.IsValidQuery(),
                 Utils.IsPrefix(z.GetRecords().Where(r => r.GetRType() == RecordType.SOA).At(0).Value().GetRName(), q.GetQName()),
                 rrs.Length() >= 2,
@@ -238,7 +238,7 @@
         private Zen<bool> RRLookupConstraints(Zen<Zone> z, Zen<Query> q, Zen<IList<ResourceRecord>> rrs)
         {
             return And(
-                z.IsValidZone(),
+                z.IsValidZoneForRRLookup(),
                 q.IsValidQuery(),
                 Utils.IsPrefix(z.GetRecords().Where(r => r.GetRType() == RecordType.SOA).At(0).Value().GetRName(), q.GetQName()),
                 rrs == ServerModel.GetRelevantRRs(q, z));

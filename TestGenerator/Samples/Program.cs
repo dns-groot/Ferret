@@ -26,7 +26,7 @@
         private static Zen<bool> RRLookupConstraints(Zen<Zone> z, Zen<Query> q, Zen<IList<ResourceRecord>> rrs)
         {
             return And(
-                z.IsValidZone(),
+                z.IsValidZoneForRRLookup(),
                 q.IsValidQuery(),
                 Utils.IsPrefix(z.GetRecords().Where(r => r.GetRType() == RecordType.SOA).At(0).Value().GetRName(), q.GetQName()),
                 rrs == ServerModel.GetRelevantRRs(q, z));
@@ -76,7 +76,7 @@
 
         static void GenerateInvalidZones(string outputDir, int maxLength)
         {
-            for (var j = 0; j < ZoneExtensions.ValidZoneConditions(Zone.Create(new List<ResourceRecord>())).Count(); j++)
+            for (var j = 1; j < ZoneExtensions.ValidZoneConditions(Zone.Create(new List<ResourceRecord>())).Count(); j++)
             {
                 var watch = System.Diagnostics.Stopwatch.StartNew();
                 var function = Function<Zone, bool>(ZoneExtensions.IsValidZone);
@@ -92,7 +92,7 @@
                     d.Add("Valid", function.Evaluate(input));
                     var options = new JsonSerializerOptions { WriteIndented = true };
                     var info = JsonSerializer.Serialize(d, options);
-                    FileInfo file = new FileInfo(outputDir + "/FalseCond_" + s + "/ZoneFiles/" + i + ".json");
+                    FileInfo file = new FileInfo(outputDir + "/FalseCond_" + s + "/ZenZoneFiles/" + i + ".json");
                     file.Directory.Create();
                     File.WriteAllText(file.FullName, info);
                     i++;

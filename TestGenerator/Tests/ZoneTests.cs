@@ -19,7 +19,7 @@
         [TestMethod]
         public void TestZoneValidityEvaluate()
         {
-            var function = Function<Zone, bool>(ZoneExtensions.IsValidZone);
+            var function = Function<Zone, bool>(ZoneExtensions.IsValidZoneForRRLookup);
 
             var soa = new ResourceRecord
             {
@@ -49,7 +49,7 @@
                 RData = new DomainName { Value = new List<byte> { } },
             };
             var z = Zone.Create(new List<ResourceRecord> { soa, r1, r2 });
-            Assert.AreEqual(z.IsValidZone(), true);
+            Assert.AreEqual(z.IsValidZoneForRRLookup(), true);
 
             Zone zn = new Zone { Records = new List<ResourceRecord> { soa, r1, r2 } };
             Assert.IsTrue(function.Evaluate(zn));
@@ -67,7 +67,7 @@
         [TestMethod]
         public void TestZoneValidityVerify()
         {
-            var function = Function<Zone, bool>(ZoneExtensions.IsValidZone);
+            var function = Function<Zone, bool>(ZoneExtensions.IsValidZoneForRRLookup);
 
             // Zone should have exactly one SOA record.
             var multipleSoa = function.Find((z, t) => And(z.GetRecords().Where(r => r.GetRType() == RecordType.SOA).Length() != 1, t), listSize: 3);
