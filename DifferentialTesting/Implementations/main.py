@@ -16,7 +16,7 @@ optional arguments:
                         The docker image name of the implementation to start a container.
   -p UNUSED_PORT        An unused host port to map to port 53 of the container.
   -c CONTAINER_NAME     A name for the container. (default: Random Docker generated name)
-  -l, --latest          Serve using the latest image. (default: Oct 2020 image)
+  -l, --latest          Serve using the latest image tag. (default: Oct 2020 image)
 """
 
 #!/usr/bin/env python3
@@ -25,7 +25,7 @@ import pathlib
 import subprocess
 import sys
 from argparse import ArgumentParser, FileType, RawTextHelpFormatter
-from typing import Optional
+from typing import Dict, Optional
 
 from Bind.prepare import run as bind
 from Coredns.prepare import run as coredns
@@ -37,7 +37,11 @@ from Trustdns.prepare import run as trustdns
 from Yadifa.prepare import run as yadifa
 
 
-def load_and_serve_zone_file(zone_file: pathlib.Path, image: Optional[str], cname: Optional[str], port: Optional[int], latest: bool) -> None:
+def load_and_serve_zone_file(zone_file: pathlib.Path,
+                             image: Optional[str],
+                             cname: Optional[str],
+                             port: Optional[int],
+                             latest: bool) -> None:
     """
     :param zone_file: Path to the Bind-style zone file
     :param image: The image name of the implementation
@@ -64,18 +68,25 @@ def load_and_serve_zone_file(zone_file: pathlib.Path, image: Optional[str], cnam
         for line in zone_pointer:
             if 'SOA' in line:
                 zone_domain = line.split('\t')[0]
+                if ' ' in zone_domain:
+                    zone_domain = line.split()[0]
     if not zone_domain:
         sys.exit(f'Error: SOA not found in {zone_file}')
 
     # Check if a container with the input name is running.
     check_status = subprocess.run(
-        ['docker', 'ps', '--format', '"{{.Names}}"'], stdout=subprocess.PIPE, check=False)
+        ['docker', 'ps', '-a', '--format', '"{{.Names}} {{.Status}}"'],
+        stdout=subprocess.PIPE, check=False)
     output = check_status.stdout.decode("utf-8")
+    container_status = {} # type: Dict[str, str]
+    for line in output.split("\n"):
+        if line:
+            container_status[line.split()[0][1:]] = line.split()[1]
     if check_status.returncode != 0:
         sys.exit(f'Error in executing Docker ps command: {output}')
     if image:
         if cname:
-            if cname in output:
+            if cname in container_status:
                 sys.exit(
                     f'Error: Cannot start a container with name {cname} as it exists already')
             else:
@@ -119,7 +130,7 @@ if __name__ == '__main__':
     parser.add_argument('-c', metavar='CONTAINER_NAME', type=str,
                         help='A name for the container. (default: Random Docker generated name)')
     parser.add_argument(
-        '-l', '--latest', help='Serve using the latest image.', action="store_true")
+        '-l', '--latest', help='Serve using the latest image tag.', action="store_true")
     args = parser.parse_args()
     if (args.i and not args.p) or (not args.i and args.p):
         sys.exit('Error: Specify both the image and port arguments (not just one) to '

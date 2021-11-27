@@ -106,27 +106,59 @@ If you have trouble with native installation, then using docker is  recommend as
     ```
     <details>
     <summary><kbd>CLICK</kbd> to show all command-line options</summary>
-    
-    ```
-        -o, --outputDir    (Default: Results/) The path to the folder to output the generated tests.
+  
+   <pre>
+    -o, --outputDir    (Default: Results/) The path to the folder to output the generated tests.
 
-        -f, --function     (Default: RRLookup) Generate tests for either 'RRLookup' (1) or generate invalid zone files 'InvalidZoneFiles' (2).
+    -f, --function     (Default: RRLookup) Generate tests for either <kbd>RRLookup</kbd> (1) or generate invalid zone files <kbd>InvalidZoneFiles</kbd> (2).
 
-        -l, --length       (Default: 4) The maximum number of records in a zone and the maximum length of a domain.
+    -l, --length       (Default: 4) The maximum number of records in a zone and the maximum length of a domain.
 
-        --help             Display this help screen.
+    --help             Display this help screen.
 
-        --version          Display version information.
-    ```
+    --version          Display version information. </pre>
+  
     - Pass the option using `dotnet run  --configuration Release --project Samples -- -l 3`.
-    - The `RRLookup` function generates valid tests which are a pair of zone and query.
-    - The `InvalidZoneFiles` function generates invalid zone files by negating one validity constraint at a time while keeping the others true. For each negated constraint, the tool tries to generates 100 zone files. 
+    - The <kbd>RRLookup</kbd> function generates valid tests which are a pair of zone and query.
+    - The <kbd>InvalidZoneFiles</kbd> function generates invalid zone files by negating one validity constraint at a time while keeping the others true. For each negated constraint, the tool tries to generates 100 zone files. 
 
     </details>
    
 3. _Est. Time:_ 
-    - Ferret takes approximately 6 hours for `RRLookup` with a maximum bound of 4 to generate 12,673 tests. Each test consists of a well-formed zone file and a query that together causes execution to explore a particular RFC behavior.
-    - Ferret takes approximately 20 minutes for `InvalidZoneFiles` generation to generate 900 ill-formed zone files, 100 violating each of the validity conditions.
-
+    - Ferret takes approximately 6 hours for <kbd>RRLookup</kbd> with a maximum bound of 4 to generate 12,673 tests. Each test consists of a well-formed zone file and a query that together causes execution to explore a particular RFC behavior.
+    - Ferret takes approximately 2 hours for <kbd>InvalidZoneFiles</kbd> generation to generate 900 ill-formed zone files, 100 violating each of the validity conditions.
+    
+    <details>
+    <summary><kbd>CLICK</kbd> to show the <code>Results</code> folder tree after test generation</summary>
+    <pre>
+    Results
+    ├── ValidZoneFileTests
+    │    └── ZenTests
+    │        ├── 0.json
+    │        ├── 1.json
+    │        ├── ...
+    │        └── 12673.json
+    └── InvalidZoneFileTests
+        ├── FalseCond_1
+        │   └── ZenZoneFiles
+        │       ├── 0.json
+        │       ├── 1.json
+        │       ├── ...
+        │       └── 99.json
+        ├── FalseCond_2
+        │   └── ZenZoneFiles
+        │       ├── 0.json
+        │       ├── 1.json
+        │       ├── ...
+        │       └── 99.json
+        ├── ...
+        └── FalseCond_9
+            └── ZenZoneFiles
+                ├── 0.json
+                ├── 1.json
+                ├── ...
+                └── 99.json</pre>
+    </details>
+    
 After the tests are generated, go to the [Differential testing](../DifferentialTesting/) module.
 
