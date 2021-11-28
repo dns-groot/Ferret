@@ -54,7 +54,7 @@ def delete_container(container_name: str) -> None:
         sys.exit(f'Error in executing Docker ps command: {output}')
     all_container_names = [name[1:-1] for name in output.strip().split("\n")]
     if container_name in all_container_names:
-        subprocess.run(['docker', 'container', 'rm', '-f', container_name], shell=True, check=True)
+        subprocess.run(['docker', 'container', 'rm', '-f', container_name], check=True)
 
 def bind(zone_file: pathlib.Path,
          origin: str,

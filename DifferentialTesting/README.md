@@ -223,7 +223,7 @@ mature zone-file preprocessor available.
     ```
     </details>
 
-- _Est Time:_ ~&thinsp;3.5 hours for the Zen generated <kbd>900</kbd> invalid zones for a maximum length of 4.
+- _Est Time:_ ~&thinsp;4 hours for the Zen generated <kbd>900</kbd> invalid zones for a maximum length of 4.
 - _Expected Output_: Creates two directories <br>
     &rdsh; `EquivalenceClassNames` directory to store the query equivalence class names generated from GRoot for each of the test zone files.<br>
     &rdsh; `Differences` directory to store responses for each query if there are different responses from the implementations.

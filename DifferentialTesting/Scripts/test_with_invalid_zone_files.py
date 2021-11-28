@@ -38,7 +38,7 @@ import dns.rdataclass
 import dns.rdatatype
 import dns.resolver
 
-from Scripts.preprocessor_checks import PREPROCESSOR_DIRECTORY
+from Scripts.preprocessor_checks import PREPROCESSOR_DIRECTORY, delete_container
 from Scripts.test_with_valid_zone_files import (DIFFERENCES, QUERY_RESPONSES,
                                                 ZONE_FILES, group_responses,
                                                 groups_to_json,
@@ -272,7 +272,8 @@ def run_tests_helper(input_args: Namespace,
         #  Generate GRoot image required for generation of queries
         generate_groot_image(logger)
         # Start the container for the GRoot
-        cmd = "docker start groot_server || docker run -d --name=groot_server groot:ferret"
+        delete_container('groot_server')
+        cmd = "docker run -d --name=groot_server groot:ferret"
         subprocess.run(cmd, shell=True, check=False)
         (input_dir / DIFFERENCES).mkdir(parents=True, exist_ok=True)
         (input_dir / EQUIVALENCE_CLASSES_DIR).mkdir(parents=True, exist_ok=True)
@@ -292,6 +293,11 @@ def run_tests_helper(input_args: Namespace,
                      int(input_args.id), tag, logger)
         logger.write(f'{datetime.now()}\tFinished checking the zone files in '
                      f'{input_dir} in {time.time() - start}s\n')
+        delete_container(f'{input_args.id}_bind_server')
+        delete_container(f'{input_args.id}_nsd_server')
+        delete_container(f'{input_args.id}_powerdns_server')
+        delete_container(f'{input_args.id}_knot_server')
+        delete_container('groot_server')
     else:
         if input_dir.is_dir():
             for subdir in input_dir.iterdir():
@@ -323,6 +329,7 @@ if __name__ == '__main__':
         dir_path = pathlib.Path(args.path)
     else:
         dir_path = pathlib.Path("Results/InvalidZoneFileTests")
+    print(f'{args.id}_bind_serever')
     if dir_path.exists():
         with open(dir_path / (str(args.id) + '_invalid_zone_files_checking_log.txt'), 'w', 1) as log_p:
             run_tests_helper(args, dir_path, log_p)
