@@ -25,6 +25,11 @@ jobs:
         with:
           dotnet-version: '5.0.x'
       
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
+        with:
+          languages: csharp, python
+          
       - name: Build the project
         run: dotnet build TestGenerator
       
@@ -35,6 +40,9 @@ jobs:
         
       - name: Run tests
         run: dotnet test TestGenerator /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+      
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v1
       
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
