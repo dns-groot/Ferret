@@ -42,7 +42,7 @@ optional arguments:
 - By default, the images are built using the implementations code as of around October 1<sup>st</sup>, 2020 (check [Readme](Implementations/README.md) for details). Pass the `-l` flag to use the latest code, but some images may not build if dependecies or other things are updated.
 - Without the `-l` flag, the built images will have the `oct` as the image tag; for example, the built Bind image would be `bind:oct`. If the `-l` flag was used to build the images, the tag would be `latest`.
 - _**Note:** Each Docker image consumes  ~&hairsp;1-2&hairsp;GB of disk space._
-- _Est. Time:_ ~&thinsp;20 mins.
+- _Est. Time:_ ~&thinsp;30 mins.
 - _Expected Output_: Docker images for the implementations.
 
 ### 2. Tests Organization
@@ -73,9 +73,9 @@ Use either Zen generated tests or custom tests to test implementations.<br>
         ```
     - Translate invalid zone files using
         ```bash
-        python3 Scripts/zone_translator.py Results/InValidZoneFileTests
+        python3 Scripts/zone_translator.py Results/InvalidZoneFileTests
         ```
--   _Est. Time:_ ~&thinsp;15 mins.
+-   _Est. Time:_ ~&thinsp;5 mins.
 -   _Expected Output_:
     - For valid zone file tests, the `translate_tests.py` script creates three directories in the `ValidZoneFileTests` directory.<br>
         &rdsh; `ZoneFiles` directory with all the zone files translated to English labels and formatted with <kbd>named-compilezone</kbd>.<br>
@@ -167,7 +167,7 @@ optional arguments:
 
 - Only four implementations &mdash; Bind, Nsd, Knot, PowerDNS &mdash; are supported as these have a
 mature zone-file preprocessor available.
-- Run the script `preprocessor_checks.py` to first check all the zone fils with each implementation's preprocessor.
+- Run the script `preprocessor_checks.py` to first check all the zone files with each implementation's preprocessor.
     ```bash
     python3 Scripts/preprocessor_checks.py
     ```
@@ -181,7 +181,7 @@ mature zone-file preprocessor available.
     optional arguments:
     -h, --help            show this help message and exit
     -path DIRECTORY_PATH  The path to the directory containing ZoneFiles; looks for ZoneFiles
-                          directory recursively. (default: Results/InValidZoneFileTests/)
+                          directory recursively. (default: Results/InvalidZoneFileTests/)
     -id {1,2,3,4,5}       Unique id for all the containers (default: 1)
     -b                    Disable Bind. (default: False)
     -n                    Disable Nsd. (default: False)
@@ -213,7 +213,7 @@ mature zone-file preprocessor available.
     -h, --help            show this help message and exit
     -path DIRECTORY_PATH  The path to the directory containing ZoneFiles and PreprocessorOutputs
                           directories; looks for those two directories recursively
-                          (default: Results/InValidZoneFileTests/)
+                          (default: Results/InvalidZoneFileTests/)
     -id {1,2,3,4,5}       Unique id for all the containers (default: 1)
     -b                    Disable Bind. (default: False)
     -n                    Disable Nsd. (default: False)

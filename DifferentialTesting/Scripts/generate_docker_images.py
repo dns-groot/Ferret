@@ -93,7 +93,7 @@ if __name__ == '__main__':
     if not args.m:
         cmds.append("maradns")
     if not args.t:
-        cmds.append("trustdns Trustdns/Dockerfile .")
+        cmds.append("trustdns")
     processPool = []
     i = 0
     j = len(cmds)
@@ -108,4 +108,4 @@ if __name__ == '__main__':
             t.start()
         for t in processPool:
             t.join()
-        log.write(f'{datetime.now()}\tTime taken to build all images: {time.time()-start}s')
+        log.write(f'{datetime.now()}\tTime taken to build all images: {time.time()-start}s\n')

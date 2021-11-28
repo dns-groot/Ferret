@@ -11,7 +11,7 @@ optional arguments:
   -h, --help            show this help message and exit
   -path DIRECTORY_PATH  The path to the directory containing ZoneFiles and PreprocessorOutputs
                          directories; looks for those two directories recursively
-                         (default: Results/InValidZoneFileTests/)
+                         (default: Results/InvalidZoneFileTests/)
   -id {1,2,3,4,5}       Unique id for all the containers (default: 1)
   -b                    Disable Bind. (default: False)
   -n                    Disable Nsd. (default: False)
@@ -273,7 +273,7 @@ def run_tests_helper(input_args: Namespace,
         generate_groot_image(logger)
         # Start the container for the GRoot
         cmd = "docker start groot_server || docker run -d --name=groot_server groot:ferret"
-        subprocess.run(cmd, shell=True, check=False, capture_output=True)
+        subprocess.run(cmd, shell=True, check=False)
         (input_dir / DIFFERENCES).mkdir(parents=True, exist_ok=True)
         (input_dir / EQUIVALENCE_CLASSES_DIR).mkdir(parents=True, exist_ok=True)
         implementations = get_ports_for_invalid_zones(input_args)
@@ -309,7 +309,7 @@ if __name__ == '__main__':
     parser.add_argument('-path', metavar='DIRECTORY_PATH', default=SUPPRESS,
                         help='The path to the directory containing ZoneFiles and '
                         'PreprocessorOutputs directories; looks for those two directories '
-                        'recursively (default: Results/InValidZoneFileTests/)')
+                        'recursively (default: Results/InvalidZoneFileTests/)')
     parser.add_argument('-id', type=int, default=1, choices=range(1, 6),
                         help='Unique id for all the containers')
     parser.add_argument('-b', help='Disable Bind.', action="store_true")
@@ -322,7 +322,7 @@ if __name__ == '__main__':
     if "path" in args:
         dir_path = pathlib.Path(args.path)
     else:
-        dir_path = pathlib.Path("Results/InValidZoneFileTests")
+        dir_path = pathlib.Path("Results/InvalidZoneFileTests")
     if dir_path.exists():
         with open(dir_path / (str(args.id) + '_invalid_zone_files_checking_log.txt'), 'w', 1) as log_p:
             run_tests_helper(args, dir_path, log_p)

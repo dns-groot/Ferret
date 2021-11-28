@@ -8,7 +8,7 @@ optional arguments:
   -h, --help            show this help message and exit
   -path DIRECTORY_PATH  The path to the directory containing ZoneFiles; looks
                         for ZoneFiles directory recursively(default:
-                        Results/InValidZoneFileTests/)
+                        Results/InvalidZoneFileTests/)
   -id {1,2,3,4,5}       Unique id for all the containers (default: 1)
   -b                    Disable Bind. (default: False)
   -n                    Disable Nsd. (default: False)
@@ -23,6 +23,7 @@ import json
 import pathlib
 import subprocess
 import time
+import sys
 from argparse import SUPPRESS, ArgumentDefaultsHelpFormatter, ArgumentParser, Namespace
 from typing import Dict, Tuple
 
@@ -44,6 +45,17 @@ def get_ports(input_args: Namespace) -> Dict[str, Tuple[bool, int]]:
     return implementations
 
 
+def delete_container(container_name: str) -> None:
+    """Deletes a container if it is running"""
+    cmd_status = subprocess.run(
+        ['docker', 'ps', '-a', '--format', '"{{.Names}}"'], stdout=subprocess.PIPE, check=False)
+    output = cmd_status.stdout.decode("utf-8")
+    if cmd_status.returncode != 0:
+        sys.exit(f'Error in executing Docker ps command: {output}')
+    all_container_names = [name[1:-1] for name in output.strip().split("\n")]
+    if container_name in all_container_names:
+        subprocess.run(['docker', 'container', 'rm', '-f', container_name], shell=True, check=True)
+
 def bind(zone_file: pathlib.Path,
          origin: str,
          cid: str,
@@ -63,8 +75,7 @@ def bind(zone_file: pathlib.Path,
     :param tag: Tag of the image to use
     """
     if new:
-        subprocess.run(['docker', 'container', 'rm', cid + '_bind_server', '-f'],
-                       stdout=subprocess.PIPE, check=False)
+        delete_container(f'{cid}_bind_server')
         subprocess.run(['docker', 'run', '-dp', str(port * int(cid))+':53/udp',
                         '--name=' + cid + '_bind_server', 'bind' + tag], check=False)
     subprocess.run(['docker', 'cp', zone_file, cid +
@@ -95,8 +106,7 @@ def nsd(zone_file: pathlib.Path,
     :param tag: Tag of the image to use
     """
     if new:
-        subprocess.run(['docker', 'container', 'rm', cid + '_nsd_server', '-f'],
-                       stdout=subprocess.PIPE, check=False)
+        delete_container(f'{cid}_nsd_server')
         subprocess.run(['docker', 'run', '-dp', str(port * int(cid))+':53/udp',
                         '--name=' + cid + '_nsd_server', 'nsd' + tag], check=False)
     subprocess.run(['docker', 'cp', zone_file, cid +
@@ -127,8 +137,7 @@ def knot(zone_file: pathlib.Path,
     :param tag: Tag of the image to use
     """
     if new:
-        subprocess.run(['docker', 'container', 'rm', cid + '_knot_server', '-f'],
-                       stdout=subprocess.PIPE, check=False)
+        delete_container(f'{cid}_knot_server')
         subprocess.run(['docker', 'run', '-dp', str(port * int(cid))+':53/udp',
                         '--name=' + cid + '_knot_server', 'knot' + tag], check=False)
     subprocess.run(['docker', 'cp', zone_file, cid +
@@ -159,8 +168,7 @@ def powerdns(zone_file: pathlib.Path,
     :param tag: Tag of the image to use
     """
     if new:
-        subprocess.run(['docker', 'container', 'rm', cid + '_powerdns_server', '-f'],
-                       stdout=subprocess.PIPE, check=False)
+        delete_container(f'{cid}_powerdns_server')
         subprocess.run(['docker', 'run', '-dp', str(port * int(cid))+':53/udp',
                         '--name=' + cid + '_powerdns_server', 'powerdns' + tag], check=False)
     subprocess.run(['docker', 'cp', zone_file, cid +
@@ -273,7 +281,7 @@ if __name__ == '__main__':
     parser.add_argument('-path', metavar='DIRECTORY_PATH', default=SUPPRESS,
                         help='The path to the directory containing ZoneFiles; '
                         'looks for ZoneFiles directory recursively'
-                        '(default: Results/InValidZoneFileTests/)')
+                        '(default: Results/InvalidZoneFileTests/)')
     parser.add_argument('-id', type=int, default=1, choices=range(1, 6),
                         help='Unique id for all the containers')
     parser.add_argument('-b', help='Disable Bind.', action="store_true")
@@ -286,7 +294,7 @@ if __name__ == '__main__':
     if "path" in args:
         dir_path = pathlib.Path(args.path)
     else:
-        dir_path = pathlib.Path("Results/InValidZoneFileTests")
+        dir_path = pathlib.Path("Results/InvalidZoneFileTests/")
     if dir_path.exists():
         preprocessor_check_helper(args, dir_path)
     else:
