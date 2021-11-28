@@ -13,7 +13,7 @@
 - All commands mentioned in this file must be run from the `DifferentialTesting` directory and not from the repository root.
 - At least _16&hairsp;GB_ of RAM is recommended for testing all the eight implementations using Docker.
 
-### 1. Docker Image Generator
+### 1. Docker Images Generation
 Generate Docker images for the implementations using:
 
 ```bash
@@ -40,7 +40,7 @@ optional arguments:
 </details>
 
 - By default, the images are built using the implementations code as of around October 1<sup>st</sup>, 2020 (check [Readme](Implementations/README.md) for details). Pass the `-l` flag to use the latest code, but some images may not build if dependecies or other things are updated.
-- Without the `-l` flag, the built images will have the `:oct` as the image tag; for example, the built Bind image would be `bind:oct`. If the `-l` flag was used to build the images, the tag would be `latest`.
+- Without the `-l` flag, the built images will have the `oct` as the image tag; for example, the built Bind image would be `bind:oct`. If the `-l` flag was used to build the images, the tag would be `latest`.
 - _**Note:** Each Docker image consumes  ~&hairsp;1-2&hairsp;GB of disk space._
 - _Est. Time:_ ~&thinsp;20 mins.
 - _Expected Output_: Docker images for the implementations.
@@ -67,7 +67,7 @@ Use either Zen generated tests or custom tests to test implementations.<br>
         ```bash
         python3 Scripts/translate_tests.py Results/ValidZoneFileTests
         ```
-        &nbsp; &rArr; &nbsp;the executable of <kbd>named-compilezone</kbd>
+        &nbsp; &rArr; &nbsp; (or) the executable of <kbd>named-compilezone</kbd>
         ```bash
         python3 Scripts/translate_tests.py Results/ValidZoneFileTests -c <path to the named-compilezone executable>
         ```
@@ -78,7 +78,7 @@ Use either Zen generated tests or custom tests to test implementations.<br>
 -   _Est. Time:_ ~&thinsp;15 mins.
 -   _Expected Output_:
     - For valid zone file tests, the `translate_tests.py` script creates three directories in the `ValidZoneFileTests` directory.<br>
-        &rdsh; `ZoneFiles` directory with all the zone files translated to English labels and formatted with `named-compilezone`.<br>
+        &rdsh; `ZoneFiles` directory with all the zone files translated to English labels and formatted with <kbd>named-compilezone</kbd>.<br>
         &rdsh; `Queries` directory contains the queries corresponding to each zone file.<br>
         &rdsh; `TestsTotalInfo` directory contains all the information regarding a test in a single JSON file, for easy debugging.
     - For invalid zone files, the `zone_translator.py` script creates a `ZoneFiles` directory in each of the subdirectories (`FalseCond_1`, `FalseCond_2`, ...).
@@ -86,7 +86,7 @@ Use either Zen generated tests or custom tests to test implementations.<br>
 #### Using Custom Tests
 - Create a directory `CustomTests` (or `Results`) and a sub-directory `ZoneFiles` in that directory.
 - Place the test zone files (`TXT` files in `Bind` format and FQDN) in `ZoneFiles` directory.
-- If you don't have any specific queries to test on these zone files, then assume them as invalid zone files and proceed to Step 3 to follow the steps of testing using invalid zone files.
+- If you don't have any specific queries to test on these zone files, then assume them as invalid zone files and proceed to [Step 3](#testing-with-invalid-zone-files) to follow the steps of testing using invalid zone files.
 - If you have queries, then for each test zone file (_foo.txt_) in `ZoneFiles`, create a same named `json` file (_foo.json_) in `Queries` directory (sibling directory of `ZoneFiles` ) with queries.
 
     <details>
@@ -191,7 +191,7 @@ mature zone-file preprocessor available.
     ```
     </details>
 
-    Creates a directory `PreprocessorOutputs` and outputs whether each preprocessor accepts or rejects the zone files along with the explanation for rejection.
+    Creates a directory `PreprocessorOutputs` and outputs whether each implementation's preprocessor accepts or rejects the zone files along with the explanation for rejection.
 
 - Run the testing script from the `DifferentialTesting` directory as a Python module using:
     ```bash
@@ -223,9 +223,9 @@ mature zone-file preprocessor available.
     ```
     </details>
 
-- _Est Time:_ ~&thinsp;3.5 hours for the Zen generated <kbd>900</kbd> invalid zones for a maximum length of $4$.
+- _Est Time:_ ~&thinsp;3.5 hours for the Zen generated <kbd>900</kbd> invalid zones for a maximum length of 4.
 - _Expected Output_: Creates two directories <br>
-    &rdsh; `EquivalenceClassNames` directory to store the query equivalence class names generated from GRoot for each of the test zone files in `ZoneFiles` directory.<br>
+    &rdsh; `EquivalenceClassNames` directory to store the query equivalence class names generated from GRoot for each of the test zone files.<br>
     &rdsh; `Differences` directory to store responses for each query if there are different responses from the implementations.
 
 ### 4. Triaging
