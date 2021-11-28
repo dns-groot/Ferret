@@ -233,12 +233,12 @@ Since there are often many more test failures than there
 are bugs (e.g., a bug can cause multiple tests to fail), we triage
 the tests in `Differences` directory by creating a _hybrid fingerprint_ for each test, which combines information from the test's path in the Zen model (if available) with the results of differential testing, and then groups tests by fingerprint for user inspection.
 
-Fingerprint and group the tests using `python3 Scripts/triaging.py`
+Fingerprint and group the tests using `python3 -m Scripts.triaging`
 <details>
 <summary><kbd>CLICK</kbd> to show all command-line options</summary>
 
 ```
-usage: triaging.py [-h] [-path DIRECTORY_PATH]
+usage: python3 -m Scripts.triaging [-h] [-path DIRECTORY_PATH]
 
 Fingerprint and group the tests that resulted in differences based on the model case (for valid zone
 files) as well as the unique implementations in each group from the responses.

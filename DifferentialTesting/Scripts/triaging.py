@@ -1,10 +1,10 @@
 """
-usage: triaging.py [-h] [-path DIRECTORY_PATH]
-
 Fingerprint and group the tests that resulted in differences based on the model case (for valid zone
 files) as well as the unique implementations in each group from the responses.
 For invalid zone files, they are already separated into different directories based on the condition
 violated. Therefore, only the unique implementations in each group is used.
+
+usage: triaging.py [-h] [-path DIRECTORY_PATH]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -17,7 +17,7 @@ import pathlib
 import sys
 from argparse import SUPPRESS, ArgumentDefaultsHelpFormatter, ArgumentParser
 from collections import defaultdict
-from typing import Dict
+from typing import Any, Dict
 
 from Scripts.test_with_valid_zone_files import (DIFFERENCES, QUERIES,
                                                 QUERY_RESPONSES)
@@ -64,24 +64,23 @@ def fingerprint_group_tests(dir_path: pathlib.Path,
                     vectors[(test_model_case, frozenset(frozen_groups))].add(
                         (zoneid, query_str))
                 else:
-                    vectors[frozenset(frozen_groups)].add((zoneid, query_str))
+                    vectors[("-", frozenset(frozen_groups))
+                            ].add((zoneid, query_str))
     summary = []
     keys = sorted(vectors.keys())
-    output = {}
-    if isinstance(keys[0], tuple):
-        # There are model cases
-        output_json = defaultdict(list)
-        model_cases_present = set(k[0] for k in keys)
-        for model_case in model_cases_present:
-            for k in keys:
-                if k[0] != model_case:
-                    continue
-                sorted_groups = sorted(k[1], key=len, reverse=True)
-                json_groups = []
-                groups_summary = ''
-                for grp in sorted_groups:
-                    groups_summary += f' {{{",".join(grp)}}} '
-                    json_groups.append(list(grp))
+    output_json = defaultdict(list)
+    model_cases_present = set(k[0] for k in keys)
+    for model_case in model_cases_present:
+        for k in keys:
+            if k[0] != model_case:
+                continue
+            sorted_groups = sorted(k[1], key=len, reverse=True)
+            json_groups = []
+            groups_summary = ''
+            for grp in sorted_groups:
+                groups_summary += f' {{{",".join(grp)}}} '
+                json_groups.append(list(grp))
+            if model_case != '-':
                 summary.append(
                     f'{model_case} {len(vectors[k])} {groups_summary}')
                 output_json[model_case].append({
@@ -89,13 +88,17 @@ def fingerprint_group_tests(dir_path: pathlib.Path,
                     'Count': len(vectors[k]),
                     'Tests': list(vectors[k])
                 })
-        output["Summary"] = summary
-        output["Details"] = output_json
-    else:
-        # No model cases
-        for k in keys:
-            summary.append(f'{len(vectors[k])} {k}')
-        output["Details"] = vectors
+            else:
+                summary.append(
+                    f'{len(vectors[k])} {groups_summary}')
+                output_json["Fingerprints"].append({
+                    'Groups': json_groups,
+                    'Count': len(vectors[k]),
+                    'Tests': list(vectors[k])
+                })
+    output = {}# type: Dict[str, Any]
+    output["Summary"] = summary
+    output["Details"] = output_json
     with open(dir_path / "Fingerprints.json", 'w') as cj_fp:
         json.dump(output, cj_fp, indent=2)
 
@@ -106,15 +109,15 @@ def get_model_cases(dir_path: pathlib.Path) -> Dict[str, Dict[str, str]]:
 
     :param dir_path: The path to the directory containing the DIFFERENCES directory.
     """
-    model_cases = defaultdict(dict)
+    model_cases = defaultdict(dict) # type: Dict[str, Dict[str, str]]
     queries_dir = dir_path / QUERIES
     expected_res_dir = dir_path / QUERY_RESPONSES
-    tag_dir = ''
+    tag_dir = None
     if queries_dir.exists() and queries_dir.is_dir():
         tag_dir = queries_dir
-    elif expected_res_dir.exist() and expected_res_dir.is_dir():
+    elif expected_res_dir.exists() and expected_res_dir.is_dir():
         tag_dir = expected_res_dir
-    if tag_dir:
+    if isinstance(tag_dir, pathlib.Path):
         for queries_file in tag_dir.iterdir():
             with open(queries_file, 'r') as qf_fp:
                 queries_info = json.load(qf_fp)
