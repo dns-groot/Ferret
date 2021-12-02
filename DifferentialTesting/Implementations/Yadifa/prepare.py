@@ -98,7 +98,7 @@ def run(zone_file: pathlib.Path, zone_domain: str, cname: str, port: int, restar
                                 stdout=subprocess.PIPE, check=False)
         # Yadifa sometimes does not stop the server and might require sending the stop command again
         if output.returncode != 0:
-            time.sleep(3)
+            time.sleep(2)
             subprocess.run(['docker', 'exec', cname, 'yadifa', 'ctrl', '-y',
                             'controller-key:ControlDaemonKey', 'shutdown'],
                            stdout=subprocess.PIPE, check=False)
@@ -116,6 +116,6 @@ def run(zone_file: pathlib.Path, zone_domain: str, cname: str, port: int, restar
     server_start = subprocess.run(
         ['docker', 'exec', cname, 'yadifad', '-d'], stdout=subprocess.PIPE, check=False)
     if server_start.returncode != 0:
-        time.sleep(3)
+        time.sleep(2)
         subprocess.run(['docker', 'exec', cname,
                         'yadifad', '-d'], stdout=subprocess.PIPE, check=False)

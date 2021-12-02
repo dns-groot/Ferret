@@ -377,7 +377,7 @@ def run_test(zoneid: str,
                     single_impl[impl] = (True, port)
                     prepare_containers(parent_directory_path / ZONE_FILES /
                                        (zoneid + '.txt'), zone_domain, cid, True, single_impl, tag)
-                    log_fp.write(f'{datetime.now()}\tRestarted {impl}\'s container while'
+                    log_fp.write(f'{datetime.now()}\tRestarted {impl}\'s container while '
                                  f'testing zone {zoneid}\n')
                     time.sleep(1)
                     respo = querier(qname, qtype, port * int(cid))
@@ -424,7 +424,7 @@ def run_tests(parent_directory_path: pathlib.Path,
         tag = ':latest'
     start_containers(input_args.id, implementations, tag)
     # Create and dump logs to a file
-    with open(parent_directory_path / (str(input_args.id) + '_log.txt'), 'w') as log_fp:
+    with open(parent_directory_path / (str(input_args.id) + '_log.txt'), 'w', 1) as log_fp:
         for zone in sorted((parent_directory_path / ZONE_FILES).iterdir(),
                            key=lambda x: int(x.stem))[start:end]:
             log_fp.write(f'{datetime.now()}\tChecking zone: {zone.stem}\n')

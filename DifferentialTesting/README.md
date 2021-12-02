@@ -160,7 +160,7 @@ optional arguments:
         ```
     </details>
 - The default host ports used for testing are: `[8000, 8100, ... 8700]*id`, which can be changed by modifying the [`get_ports`](Scripts/test_with_valid_zone_files.py#L66) function in the python script before running it.
-- _Est Time:_ ~&thinsp;36 hours (&#x1F61E;) with no parallelization for the Zen generated <kbd>12,673</kbd> tests.
+- _Est Time:_ ~&thinsp;36 hours (&#x1F61E;) with no parallelization for the Zen generated <kbd>12,673</kbd> tests. Yadifa slows down the testing process significantly due to not reloading the next zone file quickly and the script has to wait a few seconds every time that happens. 
 - _Expected Output_: Creates a directory `Differences` in the input directory to store responses for each query if there are different responses from the implementations.
 
 #### Testing with invalid zone files
@@ -253,4 +253,7 @@ optional arguments:
 </details>
 
 - _Est Time:_ ~&thinsp;2 mins.
-- _Expected Output_: Creates a `Fingerprints.json` file in each of the directories with the `Differences` directory. `Fingerprints.json` has a <kbd>Summary</kbd> section which lists for each group how many tests are in that group and a <kbd>Details</kbd> section which lists the tests for each group.
+- _Expected Output_: 
+    - Creates a `Fingerprints.json` file in each of the directories with the `Differences` directory. 
+    - `Fingerprints.json` has a <kbd>Summary</kbd> section which lists for each group how many tests are in that group and a <kbd>Details</kbd> section which lists the tests for each group.
+    - When all the 8 implementations are tested using `oct` tagged Docker images with the <kbd>12,673</kbd> tests generated with length limit 4, Ferret found more than one response in roughly 8,200 tests. When all these tests are fingerprinted and grouped using the above command, it resulted in roughly 75 unique fringerprints. For 24 of these fingerprints there is only one test with that fingerprint, while one fingerpint has roughly 1890 tests.
