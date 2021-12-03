@@ -7,7 +7,7 @@ Ferret
 Ferret is the first automatic test generator for DNS nameserver implementation RFC compliance. 
 
 <p align="center">
-  <img src="tool.jpg" width="400"/>
+  <img src="system.PNG" width="400"/>
   <br>
 </p>
 
