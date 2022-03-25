@@ -158,12 +158,12 @@ Legend - Fixed: ✅&nbsp;&nbsp;&nbsp;&nbsp;Confirmed: ☑️&nbsp;&nbsp;&nbsp;&n
         </tr>
         <tr>
            <th rowspan=2 align='center'><a href='https://github.com/samboy/MaraDNS'>Maradns<a href="README.md/#note_1"><sup>#</sup></a></a></th>
-           <td><a href='https://github.com/samboy/MaraDNS/issues/85'><code>AA</code> flag set for zone cut <code>NS</code> RRs</a></td>
+           <td><code>AA</code> flag set for zone cut <code>NS</code> RRs</td>
            <td align='left'>Wrong Flag</td>
            <td align='center'>:warning: </td>
         </tr>
         <tr>
-           <td><a href='https://github.com/samboy/MaraDNS/issues/84'>Glue records returned with <code>AA</code> flag</a></td>
+           <td>Glue records returned with <code>AA</code> flag</td>
            <td align='left'>Wrong Flag</td>
            <td align='center'> ⚠️</td>
         </tr>
@@ -186,7 +186,7 @@ Legend - Fixed: ✅&nbsp;&nbsp;&nbsp;&nbsp;Confirmed: ☑️&nbsp;&nbsp;&nbsp;&n
         <tr>
            <td><a href='https://github.com/bluejekyll/trust-dns/issues/1283'><code>CNAME</code> loop crashes the server</a></td>
            <th align='left'>Server Crash</th>
-           <td align='center'>☑️</td>
+           <td align='center'>✅</td>
         </tr>
     </tbody>
 </table>
