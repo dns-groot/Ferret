@@ -16,6 +16,28 @@ The [test case generation](TestGenerator/) module is implemented in C# and symbo
 
 Follow the steps mentioned in test case generation [README](TestGenerator/) to generate tests using Zen. Use either the Zen generated tests or custom tests to test implementations by following the steps mentioned in DifferentialTesting [README](DifferentialTesting/). To simply serve a zone using an implementation docker container follow these [steps](DifferentialTesting/Implementations).
 
+
+:page_with_curl: [NSDI 2022](https://www.usenix.org/conference/nsdi22) -- [SCALE: Automatically Finding RFC Compliance Bugs in DNS Nameservers](https://www.usenix.org/conference/nsdi22/presentation/kakarla)
+
+:desktop_computer: [Slides and Talk](https://www.sivak.dev/projects/8-ferret)
+
+## Citing Ferret
+
+```
+@inproceedings {278336,
+author = {Siva Kesava Reddy Kakarla and Ryan Beckett and Todd Millstein and George Varghese},
+title = {{SCALE}: Automatically Finding {RFC} Compliance Bugs in {DNS} Nameservers},
+booktitle = {19th USENIX Symposium on Networked Systems Design and Implementation (NSDI 22)},
+year = {2022},
+isbn = {978-1-939133-27-4},
+address = {Renton, WA},
+pages = {307--323},
+url = {https://www.usenix.org/conference/nsdi22/presentation/kakarla},
+publisher = {USENIX Association},
+month = apr,
+}
+```
+
 ## Bugs Found
 
 Legend - Fixed: ✅&nbsp;&nbsp;&nbsp;&nbsp;Confirmed: ☑️&nbsp;&nbsp;&nbsp;&nbsp;Bug but not fixing it: :warning: 
@@ -192,3 +214,6 @@ Legend - Fixed: ✅&nbsp;&nbsp;&nbsp;&nbsp;Confirmed: ☑️&nbsp;&nbsp;&nbsp;&n
 </table>
 
 <a id="note_1"><sup>#</sup></a> Implementations with unreported issues due to missing or unimplemented features
+
+
+
