@@ -46,6 +46,8 @@ RUN cd pdns && \
     make && \
     make install
 
+# ./configure --with-modules="bind gsqlite3" --disable-lua-records    
+# cd /usr/local/etc && pdnsutil create-bind-db testsec
 COPY Powerdns/bindbackend.conf /usr/local/etc/
 COPY Powerdns/pdns.conf /usr/local/etc/
 COPY db.campus.edu /usr/local/etc/
