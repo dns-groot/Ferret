@@ -52,8 +52,8 @@ def load_and_serve_zone_file(zone_file: pathlib.Path,
     tag = ':oct'
     if latest:
         tag = ':latest'
-    image += tag
     if image:
+        image += tag
         # Check if the docker image exists.
         check_image = subprocess.run(
             ['docker', 'inspect', image], stdout=subprocess.PIPE, check=False)
@@ -110,7 +110,7 @@ def load_and_serve_zone_file(zone_file: pathlib.Path,
             f'Error: Docker inspect failed when getting name for the container with id: {cid}')
     cname, image_name = get_name.stdout.decode("utf-8").strip("/\n\"").split()
     globals()[image_name.split(":")[0]](
-        zone_file, zone_domain, cname, port, "False", tag)
+        zone_file, zone_domain, cname, 8000, False, tag)
 
 
 if __name__ == '__main__':
