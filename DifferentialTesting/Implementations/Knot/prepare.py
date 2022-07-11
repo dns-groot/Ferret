@@ -31,7 +31,7 @@ def run(zone_file: pathlib.Path, zone_domain: str, cname: str, port: int, restar
                         '/usr/local/etc/knot/knot.conf', 'stop'],
                        stdout=subprocess.PIPE, check=False)
     # Copy the new zone file into the container
-    subprocess.run(['docker', 'cp', zone_file, cname +
+    subprocess.run(['docker', 'cp', str(zone_file), cname +
                     ':/usr/local/var/lib/knot/'], stdout=subprocess.PIPE, check=False)
     # Create the Knot-specific configuration file
     knot_conf = 'server:\n    listen: 0.0.0.0@53\n    listen: ::@53\n    rundir: "/usr/local/var/run/knot"\n\n'

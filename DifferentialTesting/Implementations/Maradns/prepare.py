@@ -34,7 +34,7 @@ def run(zone_file: pathlib.Path, zone_domain: str, cname: str, port: int, restar
         subprocess.run(['docker', 'exec', cname,
                         '/etc/init.d/maradns', 'stop'], stdout=subprocess.PIPE, check=False)
     # Copy the new zone file into the container
-    subprocess.run(['docker', 'cp', zone_file,
+    subprocess.run(['docker', 'cp', str(zone_file),
                     cname + ':/etc/maradns'], stdout=subprocess.PIPE, check=False)
     # Shell script to run inside the container to generate the "mararc" configuration file
     # It has to be run in the container to get the container interface IP to which the

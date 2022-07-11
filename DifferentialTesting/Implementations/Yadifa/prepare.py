@@ -103,7 +103,7 @@ def run(zone_file: pathlib.Path, zone_domain: str, cname: str, port: int, restar
                             'controller-key:ControlDaemonKey', 'shutdown'],
                            stdout=subprocess.PIPE, check=False)
     # Copy the new zone file into the container
-    subprocess.run(['docker', 'cp', zone_file,
+    subprocess.run(['docker', 'cp', str(zone_file),
                     cname + ':/usr/local/var/zones/masters/'], stdout=subprocess.PIPE, check=False)
     # Create the Yadifa-specific configuration file
     with open('yadifad_'+cname+'.conf', 'w') as tmp:

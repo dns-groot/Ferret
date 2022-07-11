@@ -30,7 +30,7 @@ def run(zone_file: pathlib.Path, zone_domain: str, cname: str, port: int, restar
         subprocess.run(['docker', 'exec', cname, 'pkill',
                         'pdns_server'], stdout=subprocess.PIPE, check=False)
     # Copy the new zone file into the container
-    subprocess.run(['docker', 'cp', zone_file, cname +
+    subprocess.run(['docker', 'cp', str(zone_file), cname +
                     ':/usr/local/etc'], stdout=subprocess.PIPE, check=False)
     # Create the PowerDNS-specific configuration file
     bindbackend = f'zone "{zone_domain}" {{\n  file "/usr/local/etc/{zone_file.name}";\n  type master;\n}};'

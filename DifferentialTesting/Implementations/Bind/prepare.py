@@ -31,7 +31,7 @@ def run(zone_file: pathlib.Path, zone_domain: str, cname: str, port: int, restar
         subprocess.run(
             ['docker', 'exec', cname, 'pkill', 'named'], check=False)
     # Copy the new zone file into the container
-    subprocess.run(['docker', 'cp', zone_file, cname +
+    subprocess.run(['docker', 'cp', str(zone_file), cname +
                     ':/usr/local/etc'], stdout=subprocess.PIPE, check=False)
     # Create the Bind-specific configuration file
     named = f'''

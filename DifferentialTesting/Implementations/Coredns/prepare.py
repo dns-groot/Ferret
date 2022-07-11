@@ -30,7 +30,7 @@ def run(zone_file: pathlib.Path, zone_domain: str, cname: str, port: int, restar
         subprocess.run(['docker', 'exec', cname, 'pkill',
                         'coredns'], stdout=subprocess.PIPE, check=False)
     # Copy the new zone file into the container
-    subprocess.run(['docker', 'cp', zone_file, cname +
+    subprocess.run(['docker', 'cp', str(zone_file), cname +
                     ':/go/coredns'], stdout=subprocess.PIPE, check=False)
     # Create the CoreDNS-specific configuration file
     corefile = f'{zone_domain}:53 {{\n\tfile {zone_file.name}\n\tlog\n\terrors\n}}'

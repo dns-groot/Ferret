@@ -30,7 +30,7 @@ def run(zone_file: pathlib.Path, zone_domain: str, cname: str, port: int, restar
         subprocess.run(
             ['docker', 'exec', cname, 'pkill', 'named'], stdout=subprocess.PIPE, check=False)
     # Copy the new zone file into the container
-    subprocess.run(['docker', 'cp', zone_file, cname +
+    subprocess.run(['docker', 'cp', str(zone_file), cname +
                     ':trust-dns/tests/test-data/named_test_configs/'],
                    stdout=subprocess.PIPE, check=False)
     # Create the TrustDNS-specific configuration file

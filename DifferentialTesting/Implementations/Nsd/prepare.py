@@ -32,7 +32,7 @@ def run(zone_file: pathlib.Path, zone_domain: str, cname: str, port: int, restar
         subprocess.run(
             ['docker', 'exec', cname, 'nsd-control', 'stop'], stdout=subprocess.PIPE, check=False)
     # Copy the new zone file into the container
-    subprocess.run(['docker', 'cp', zone_file,
+    subprocess.run(['docker', 'cp', str(zone_file),
                     cname + ':/etc/nsd/zones'], stdout=subprocess.PIPE, check=False)
     # Create the NSD-specific configuration file
     nsd_conf = f'''
