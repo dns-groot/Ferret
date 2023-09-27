@@ -5,7 +5,7 @@ expected response to flag differences (only when one implementation is passed fo
 
 usage: test_with_valid_zone_files.py [-h] [-path DIRECTORY_PATH]
                                      [-id {1,2,3,4,5}] [-r START END] [-b]
-                                     [-n] [-k] [-p] [-c] [-y] [-m] [-t] [-l]
+                                     [-n] [-k] [-p] [-c] [-y] [-m] [-t] [-e] [-l]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -23,6 +23,7 @@ optional arguments:
   -y                    Disable Yadifa. (default: False)
   -m                    Disable MaraDns. (default: False)
   -t                    Disable TrustDns. (default: False)
+  -e                    Disable Technitium. (default: False)
   -l, --latest          Test using latest image tag. (default: False)
 """
 #!/usr/bin/env python3
@@ -50,6 +51,7 @@ from Implementations.Knot.prepare import run as knot
 from Implementations.Maradns.prepare import run as maradns
 from Implementations.Nsd.prepare import run as nsd
 from Implementations.Powerdns.prepare import run as powerdns
+from Implementations.Technitium.prepare import run as technitium
 from Implementations.Trustdns.prepare import run as trustdns
 from Implementations.Yadifa.prepare import run as yadifa
 
@@ -79,6 +81,7 @@ def get_ports(input_args: Namespace) -> Dict[str, Tuple[bool, int]]:
     implementations['coredns'] = (not input_args.c, 8500)
     implementations['maradns'] = (not input_args.m, 8600)
     implementations['trustdns'] = (not input_args.t, 8700)
+    implementations['technitium'] = (not input_args.e, 8800)
     return implementations
 
 
@@ -96,7 +99,7 @@ def remove_container(cid: int) -> None:
         sys.exit(f'Error in executing Docker ps command: {output}')
     all_container_names = [name[1:-1] for name in output.strip().split("\n")]
     servers = ["_bind_server", "_nsd_server", "_knot_server", "_powerdns_server",
-               "_maradns_server", "_yadifa_server", "_trustdns_server", "_coredns_server"]
+               "_maradns_server", "_yadifa_server", "_trustdns_server", "_coredns_server", "_technitium_server"]
     for server in servers:
         # Force remove the container if it is running
         if str(cid) + server in all_container_names:
@@ -117,8 +120,12 @@ def start_containers(cid: int, implementations: Dict[str, Tuple[bool, int]], tag
     remove_container(cid)
     for impl, (check, port) in implementations.items():
         if check:
-            subprocess.run(['docker', 'run', '-dp', str(port * cid)+':53/udp',
-                            '--name=' + str(cid) + '_' + impl + '_server', impl + tag], check=True)
+            if impl == 'technitium':
+                subprocess.run(['docker', 'run', '-dp', str(port * cid) + ':53/udp', '-p', f'{str(port * cid + 1)}:5380/tcp',
+                                '--name=' + str(cid) + '_' + impl + '_server', impl + tag], check=True)
+            else:
+                subprocess.run(['docker', 'run', '-dp', str(port * cid) + ':53/udp',
+                                '--name=' + str(cid) + '_' + impl + '_server', impl + tag], check=True)
 
 
 def querier(query_name: str, query_type: str, port: int) -> Union[str, dns.message.Message]:
@@ -185,7 +192,7 @@ def response_equality_check(response_a: Union[str, dns.message.Message],
         return False
     # Check authority section only when both the answer sections are non-empty
     # as implementations can add SOA/NS records to the authority section
-    if not(len(response_a.answer) and len(response_b.answer)):
+    if not (len(response_a.answer) and len(response_b.answer)):
         return check_section(response_a.authority, response_b.authority)
     return True
 
@@ -257,7 +264,7 @@ def prepare_containers(zone_file: pathlib.Path,
                 Process(target=globals()[impl],
                         args=(zone_file, zone_domain,
                               str(cid) + '_' + impl + '_server',
-                              port*cid, restart, tag)))
+                              port * cid, restart, tag)))
     for process in process_pool:
         process.start()
     for process in process_pool:
@@ -297,7 +304,8 @@ def get_queries(zoneid: str,
             return json.load(query_resp_fp)
     else:
         if not (directory_path / QUERIES).exists():
-            log_fp.write(f'{datetime.now()}\tThere is no {QUERIES} directory\n')
+            log_fp.write(
+                f'{datetime.now()}\tThere is no {QUERIES} directory\n')
             errors[zoneid] = f'There is no {QUERIES} directory\n'
             return []
         if not (directory_path / QUERIES / (zoneid + '.json')).exists():
@@ -477,6 +485,7 @@ if __name__ == '__main__':
     parser.add_argument('-y', help='Disable Yadifa.', action="store_true")
     parser.add_argument('-m', help='Disable MaraDns.', action="store_true")
     parser.add_argument('-t', help='Disable TrustDns.', action="store_true")
+    parser.add_argument('-e', help='Disable Technitium.', action="store_true")
     parser.add_argument(
         '-l', '--latest', help='Test using latest image tag.', action="store_true")
 
@@ -489,7 +498,8 @@ if __name__ == '__main__':
         sys.exit(
             f'The directory {dir_path} does not have ZoneFiles directory')
     checked_implementations = (not args.b) + (not args.n) + (not args.k) + \
-        (not args.p) + (not args.c) + (not args.y) + (not args.m) + (not args.t)
+        (not args.p) + (not args.c) + (not args.y) + \
+        (not args.m) + (not args.t) + (not args.e)
     if checked_implementations == 0:
         sys.exit('Enable at least one implementation')
     if checked_implementations < 2:

@@ -23,7 +23,7 @@ python3 Scripts/generate_docker_images.py
 <summary><kbd>CLICK</kbd> to show all command-line options</summary>
 
 ```
-usage: generate_docker_images.py [-h] [-l] [-b] [-n] [-k] [-p] [-c] [-y] [-m] [-t]
+usage: generate_docker_images.py [-h] [-l] [-b] [-n] [-k] [-p] [-c] [-y] [-m] [-t] [-e]
 
 optional arguments:
 -h, --help    show this help message and exit
@@ -36,10 +36,11 @@ optional arguments:
 -y            Disable Yadifa. (default: False)
 -m            Disable MaraDns. (default: False)
 -t            Disable TrustDns. (default: False)
+-e            Disable Technitium. (default: False)
 ```
 </details>
 
-- By default, the images are built using the implementations code as of around October 1<sup>st</sup>, 2020 (check [Readme](Implementations/README.md) for details). Pass the `-l` flag to use the latest code, but some images may not build if dependecies or other things are updated.
+- By default, the images are built using the implementations code as of around October 1<sup>st</sup>, 2020 (check [Readme](Implementations/README.md) for details). Pass the `-l` flag to use the latest code, but some images may not build if dependecies or other things are updated. Technitium is always built with the latest commit irrespective of the `-l` flag.
 - Without the `-l` flag, the built images will have the `oct` as the image tag; for example, the built Bind image would be `bind:oct`. If the `-l` flag was used to build the images, the tag would be `latest`.
 - _**Note:** Each Docker image consumes  ~&hairsp;1-2&hairsp;GB of disk space._
 - _Est. Time:_ ~&thinsp;30 mins.
@@ -122,7 +123,7 @@ Run the testing script from the `DifferentialTesting` directory as a Python modu
 ```
 usage: python3 -m Scripts.test_with_valid_zone_files [-h] [-path DIRECTORY_PATH]
                                                      [-id {1,2,3,4,5}] [-r START END] [-b]
-                                                     [-n] [-k] [-p] [-c] [-y] [-m] [-t] [-l]
+                                                     [-n] [-k] [-p] [-c] [-y] [-m] [-t] [-e] [-l]
 
 Runs tests with valid zone files on different implementations.
 Either compares responses from mulitple implementations with each other or uses a
@@ -144,6 +145,7 @@ optional arguments:
   -y                    Disable Yadifa. (default: False)
   -m                    Disable MaraDns. (default: False)
   -t                    Disable TrustDns. (default: False)
+  -e                    Disable Technitium. (default: False)
   -l, --latest          Test using latest image tag. (default: False)
 ```
 - Arguments `-r` and `-id` can be used to parallelize testing. 

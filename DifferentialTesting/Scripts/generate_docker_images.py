@@ -2,7 +2,7 @@
 Builds docker images for the implementations.
 Creates and prints logs to the image_generation_log.txt file.
 
-usage: generate_docker_images.py [-h] [-l] [-b] [-n] [-k] [-p] [-c] [-y] [-m] [-t]
+usage: generate_docker_images.py [-h] [-l] [-b] [-n] [-k] [-p] [-c] [-y] [-m] [-t] [-e]
 
 optional arguments:
   -h, --help    show this help message and exit
@@ -15,6 +15,7 @@ optional arguments:
   -y            Disable Yadifa. (default: False)
   -m            Disable MaraDns. (default: False)
   -t            Disable TrustDns. (default: False)
+  -e            Disable Technitium. (default: False)
 """
 #!/usr/bin/env python3
 
@@ -23,9 +24,10 @@ import platform
 import subprocess
 import time
 from argparse import ArgumentDefaultsHelpFormatter, ArgumentParser
+from datetime import datetime
 from multiprocessing import Process
 from typing import TextIO
-from datetime import datetime
+
 
 def build_docker_images(implementation: str, latest: bool, log_fp: TextIO) -> None:
     """
@@ -56,7 +58,8 @@ def build_docker_images(implementation: str, latest: bool, log_fp: TextIO) -> No
         cmd_output = subprocess.run(
             run_cmd, stdout=subprocess.PIPE, cwd='Implementations/', check=True)
     if cmd_output.returncode != 0:
-        log_fp.write(f'{datetime.now()}\tError in building image for {implementation}.\n')
+        log_fp.write(
+            f'{datetime.now()}\tError in building image for {implementation}.\n')
     else:
         log_fp.write(
             f'{datetime.now()}\tTime to build {implementation} image: {time.time()-begin_time}s\n')
@@ -76,6 +79,7 @@ if __name__ == '__main__':
     parser.add_argument('-y', help='Disable Yadifa.', action="store_true")
     parser.add_argument('-m', help='Disable MaraDns.', action="store_true")
     parser.add_argument('-t', help='Disable TrustDns.', action="store_true")
+    parser.add_argument('-e', help='Disable Technitium.', action="store_true")
     args = parser.parse_args()
     cmds = []
     if not args.b:
@@ -94,6 +98,8 @@ if __name__ == '__main__':
         cmds.append("maradns")
     if not args.t:
         cmds.append("trustdns")
+    if not args.e:
+        cmds.append("technitium")
     processPool = []
     i = 0
     j = len(cmds)
@@ -102,10 +108,11 @@ if __name__ == '__main__':
         while j:
             processPool.append(
                 Process(target=build_docker_images, args=(cmds[i], args.latest, log)))
-            i = i+1
+            i = i + 1
             j = j - 1
         for t in processPool:
             t.start()
         for t in processPool:
             t.join()
-        log.write(f'{datetime.now()}\tTime taken to build all images: {time.time()-start}s\n')
+        log.write(
+            f'{datetime.now()}\tTime taken to build all images: {time.time()-start}s\n')

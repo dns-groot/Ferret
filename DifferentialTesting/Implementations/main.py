@@ -5,18 +5,19 @@ the zone file into the container. The module also generates the necessar
 implementation-specific configuration files.
 
 usage: main.py [-h] [-z ZONE_FILE_PATH] [-i {yadifa,powerdns,maradns,nsd,
-                        trustdns,bind,knot,coredns}] [-p UNUSED_PORT] [-c CONTAINER_NAME] [-l]
+                        trustdns,bind,knot,coredns,technitium}] [-p UNUSED_PORT] [-c CONTAINER_NAME] [-l] [-e]
 
 Specify an image name and a port to start a fresh container (also container name if you want
 to assign a name) or only the name of an existing container to reuse it.
 
 optional arguments:
   -z ZONE_FILE_PATH     The path to the zone file to be served. (default: db.campus.edu.)
-  -i {yadifa,powerdns,maradns,nsd,trustdns,bind,knot,coredns}
+  -i {yadifa,powerdns,maradns,nsd,trustdns,bind,knot,coredns,technitium}
                         The docker image name of the implementation to start a container.
   -p UNUSED_PORT        An unused host port to map to port 53 of the container.
   -c CONTAINER_NAME     A name for the container. (default: Random Docker generated name)
   -l, --latest          Serve using the latest image tag. (default: Oct 2020 image)
+  -e                    Whether the implementation is Technitium. (default: False)
 """
 
 #!/usr/bin/env python3
@@ -33,6 +34,7 @@ from Knot.prepare import run as knot
 from Maradns.prepare import run as maradns
 from Nsd.prepare import run as nsd
 from Powerdns.prepare import run as powerdns
+from Technitium.prepare import run as technitium
 from Trustdns.prepare import run as trustdns
 from Yadifa.prepare import run as yadifa
 
@@ -41,13 +43,14 @@ def load_and_serve_zone_file(zone_file: pathlib.Path,
                              image: Optional[str],
                              cname: Optional[str],
                              port: Optional[int],
-                             latest: bool) -> None:
+                             latest: bool,
+                             technitium: bool) -> None:
     """
     :param zone_file: Path to the Bind-style zone file
     :param image: The image name of the implementation
     :param cname: Container name
     :param port: The host port which is mapped to the port 53 of the container
-    :param latest: Whether to use tha latest tag
+    :param latest: Whether to use the latest tag
     """
     tag = ':oct'
     if latest:
@@ -78,7 +81,7 @@ def load_and_serve_zone_file(zone_file: pathlib.Path,
         ['docker', 'ps', '-a', '--format', '"{{.Names}} {{.Status}}"'],
         stdout=subprocess.PIPE, check=False)
     output = check_status.stdout.decode("utf-8")
-    container_status = {} # type: Dict[str, str]
+    container_status = {}  # type: Dict[str, str]
     for line in output.split("\n"):
         if line:
             container_status[line.split()[0][1:]] = line.split()[1]
@@ -90,11 +93,19 @@ def load_and_serve_zone_file(zone_file: pathlib.Path,
                 sys.exit(
                     f'Error: Cannot start a container with name {cname} as it exists already')
             else:
-                start_container = subprocess.run(['docker', 'run', '-dp', str(
-                    port)+':53/udp', '--name=' + cname, image], stdout=subprocess.PIPE, check=False)
+                if technitium:
+                    start_container = subprocess.run(['docker', 'run', '-dp', str(port) + ':53/udp', '-p', f'{str(port + 1)}:5380/tcp',
+                                                      '--name=' + cname, image], stdout=subprocess.PIPE, check=True)
+                else:
+                    start_container = subprocess.run(['docker', 'run', '-dp', str(
+                        port) + ':53/udp', '--name=' + cname, image], stdout=subprocess.PIPE, check=False)
         else:
-            start_container = subprocess.run(['docker', 'run', '-dp', str(port)+':53/udp',
-                                              image], stdout=subprocess.PIPE, check=False)
+            if technitium:
+                start_container = subprocess.run(['docker', 'run', '-dp', str(port) + ':53/udp', '-p', f'{str(port + 1)}:5380/tcp',
+                                                  image], stdout=subprocess.PIPE, check=True)
+            else:
+                start_container = subprocess.run(['docker', 'run', '-dp', str(port) + ':53/udp',
+                                                  image], stdout=subprocess.PIPE, check=False)
         if start_container.returncode != 0:
             sys.exit(f'Unable to a start a container for {image}')
         cid = start_container.stdout.decode("utf-8").strip()
@@ -110,7 +121,7 @@ def load_and_serve_zone_file(zone_file: pathlib.Path,
             f'Error: Docker inspect failed when getting name for the container with id: {cid}')
     cname, image_name = get_name.stdout.decode("utf-8").strip("/\n\"").split()
     globals()[image_name.split(":")[0]](
-        zone_file, zone_domain, cname, 8000, False, tag)
+        zone_file, zone_domain, cname, port, False, tag)
 
 
 if __name__ == '__main__':
@@ -123,7 +134,7 @@ if __name__ == '__main__':
     parser.add_argument('-z', metavar='ZONE_FILE_PATH', type=FileType('r'), default='db.campus.edu',
                         help='The path to the zone file to be served. (default: db.campus.edu.)')
     parser.add_argument('-i', type=str, choices={'bind', 'nsd', 'knot', 'powerdns', 'coredns',
-                                                 'yadifa', 'maradns', 'trustdns'},
+                                                 'yadifa', 'maradns', 'trustdns', 'technitium'},
                         help='The docker image name of the implementation to start a container.')
     parser.add_argument('-p', metavar='UNUSED_PORT', type=int,
                         help='An unused host port to map to port 53 of the container.')
@@ -131,6 +142,8 @@ if __name__ == '__main__':
                         help='A name for the container. (default: Random Docker generated name)')
     parser.add_argument(
         '-l', '--latest', help='Serve using the latest image tag.', action="store_true")
+    parser.add_argument(
+        '-e', help='Whether the implementation is Technitium.', action="store_true")
     args = parser.parse_args()
     if (args.i and not args.p) or (not args.i and args.p):
         sys.exit('Error: Specify both the image and port arguments (not just one) to '
@@ -139,5 +152,10 @@ if __name__ == '__main__':
         sys.exit('Error: Specify either an image name and a port to start a fresh '
                  'container (also container name if you want to assign a name) or '
                  'only the name of an existing container to reuse it.')
+    if args.i and args.i == 'technitium':
+        args.e = True
+    if args.e and not args.latest:
+        print('Technitium does not have an older image, using the latest version')
+        args.latest = True
     load_and_serve_zone_file(pathlib.Path(args.z.name),
-                             args.i, args.c, args.p, args.latest)
+                             args.i, args.c, args.p, args.latest, args.e)
