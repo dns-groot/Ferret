@@ -210,6 +210,27 @@ Legend - Fixed: ✅&nbsp;&nbsp;&nbsp;&nbsp;Confirmed: ☑️&nbsp;&nbsp;&nbsp;&n
            <th align='left'>Server Crash</th>
            <td align='center'>✅</td>
         </tr>
+        <tr>
+           <th rowspan=4 align='center'><a href='https://github.com/TechnitiumSoftware/DnsServer'>Technitium</a></th>
+           <td><a href='https://github.com/TechnitiumSoftware/DnsServer/issues/747'>Wrong <code>RCODE</code> for synthesized record</a></td>
+           <td align='left'>Wrong <code>RCODE</code></td>
+           <td align='center'>☑️</td>
+        </tr>
+        <tr>
+           <td><a href='https://github.com/TechnitiumSoftware/DnsServer/issues/748'>Improper handling of non-terminal wildcard</a></td>
+           <td align='left'>Wrong Answer</td>
+           <td align='center'>☑️</td>
+        </tr>
+        <tr>
+           <td><a href='https://github.com/TechnitiumSoftware/DnsServer/issues/749'>Used records below delegation</a></a></td>
+           <td align='left'>Wrong Answer</td>
+           <td align='center'>☑️</td>
+        </tr>
+        <tr>
+           <td><a href='https://github.com/TechnitiumSoftware/DnsServer/issues/750'>Wildcard <code>CNAME</code> not applied again</a></a></td>
+           <td align='left'>Wrong Answer</td>
+           <td align='center'>☑️</td>
+        </tr>
     </tbody>
 </table>
 

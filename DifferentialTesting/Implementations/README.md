@@ -8,6 +8,7 @@
     **Please note:**
     - Use the `image_name` same as the `directory_name` but in lowercase.
     - _Each Docker image consumes  ~&hairsp;1-2&hairsp;GB of disk space._
+    - Technitium implementation does not have the corresponding Oct, 2020 version, and only the latest commit is used for any build.
 
     By default, the image built uses the code around October 1<sup>st</sup>, 2020. The links to the exact `commit` used are as follows:
     
@@ -28,7 +29,7 @@
 2. Serve a zone file with an implementation using `python3 main.py`.
 
     <pre>
-    usage: main.py [-h] [-z ZONE_FILE_PATH] [-c CONTAINER_NAME]  [-p UNUSED_PORT] [-i {bind, nsd, knot, powerdns, coredns, yadifa, maradns, trustdns}]
+    usage: main.py [-h] [-z ZONE_FILE_PATH] [-c CONTAINER_NAME]  [-p UNUSED_PORT] [-i {bind, nsd, knot, powerdns, coredns, yadifa, maradns, trustdns}] [-l] [-e]
 
     Gets an implementation to serve the input or default zone file.
     Specify an image name and a port to start a new container (also container name if you want to assign a name)
@@ -42,6 +43,7 @@
     -p UNUSED_PORT                          An unused host port to map to port 53 of the container.
     -c CONTAINER_NAME                       A name for the container. (default: Random Docker generated name)
     -l, --latest                            Serve using the latest image tag.
+    -e                    Whether the implementation is Technitium. (default: False)
     </pre>
 
 3. Query from the host machine using:
